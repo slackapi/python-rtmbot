@@ -4,6 +4,11 @@ A Slack bot written in python that connects via the RTM API.
 
 Python-rtmbot is a callback based bot engine. The plugins architecture should be familiar to anyone with knowledge to the [Slack API](https://api.slack.com) and Python. The configuration file format is YAML.
 
+Some differences to webhooks:
+1. Doesn't a webserver to receive messages
+2. Logs in as a slack user (or bot)
+3. Bot users must be invited to a channel
+
 Dependencies
 ----------
 * websocket-client https://pypi.python.org/pypi/websocket-client/
@@ -81,3 +86,6 @@ Plugins can also run methods on a schedule. This allows a plugin to poll for upd
 
 ####Plugin misc
 The data is a plugin persists for the life of the rtmbot process. If you need persistent data, you should use something like sqlite or the python pickle libraries.
+
+####Todo:
+Some rtm data should be handled upstream, such as channel and user creation. These should create the proper objects on-the-fly.
