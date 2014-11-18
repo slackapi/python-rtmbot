@@ -74,10 +74,10 @@ class Plugin(object):
             print self.module.crontable
     def do(self, function_name, data):
         if function_name in dir(self.module):
-#            try:
-            eval("self.module."+function_name)(data)
-#            except:
-#                dbg("problem in module")
+            try:
+                eval("self.module."+function_name)(data)
+            except:
+                dbg("problem in module")
     def do_jobs(self):
         for job in self.jobs:
             job.check()
