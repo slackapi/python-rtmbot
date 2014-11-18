@@ -1,5 +1,8 @@
 #!/usr/bin/python
 
+import sys
+sys.dont_write_bytecode = True
+
 import glob
 import yaml
 import json
@@ -47,13 +50,15 @@ class RtmBot(object):
             plugin.do_jobs()
     def load_plugins(self):
         path = os.path.dirname(sys.argv[0])
-        sys.path.insert(0, path + "/plugins")
-        for plugin in glob.glob(path+'/plugins/*.py'):
+        for plugin in glob.glob(path+'/plugins/*'):
+            sys.path.insert(0, plugin)
+        for plugin in glob.glob(path+'/plugins/*/*.py'):
+            print plugin
             name = plugin.split('/')[-1][:-2]
-            try:
-                self.bot_plugins.append(Plugin(name))
-            except:
-                print "error loading plugin %s" % name
+#            try:
+            self.bot_plugins.append(Plugin(name))
+#            except:
+#                print "error loading plugin %s" % name
 
 class Plugin(object):
     def __init__(self, name):
@@ -69,7 +74,10 @@ class Plugin(object):
             print self.module.crontable
     def do(self, function_name, data):
         if function_name in dir(self.module):
+#            try:
             eval("self.module."+function_name)(data)
+#            except:
+#                dbg("problem in module")
     def do_jobs(self):
         for job in self.jobs:
             job.check()
