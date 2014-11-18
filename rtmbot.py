@@ -72,6 +72,8 @@ class Plugin(object):
             for interval, function in self.module.crontable:
                 self.jobs.append(Job(interval, eval("self.module."+function)))
             print self.module.crontable
+        else:
+            self.module.crontable = []
     def do(self, function_name, data):
         if function_name in dir(self.module):
             try:
@@ -89,6 +91,8 @@ class Plugin(object):
                     output.append(self.module.outputs.pop(0))
                 else:
                     break
+            else:
+                self.module.outputs = []
         return output
 
 class Job(object):
