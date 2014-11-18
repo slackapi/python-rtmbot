@@ -46,7 +46,7 @@ Installation
 Add Plugins
 -------
 
-Each plugin should create a directory under ```plugins/``` with .py files for the code you would like to load. libraries can be kept in a subdirectory.
+Each plugin should create a directory under ```plugins/``` with .py files for the code you would like to load. libraries can be kept in a subdirectory. You can install as many plugins as you like, and each will handle every event received by the bot indepentently.
 
 To install the example 'repeat' plugin
 
