@@ -9,6 +9,10 @@ import time
 
 from slackclient import SlackClient
 
+def dbg(debug_string):
+    if debug:
+        print debug_string
+
 class RtmBot(object):
     def __init__(self, token):
         self.token = token
@@ -24,13 +28,13 @@ class RtmBot(object):
         while True:
             for reply in self.slack_client.read():
                 self.input(reply)
-                #print self.bot_plugins
             self.crons()
             self.output()
             time.sleep(.1)
     def input(self, data):
         if "type" in data:
             function_name = "process_" + data["type"]
+            dbg(function_name)
             for plugin in self.bot_plugins:
                 plugin.do(function_name, data)
     def output(self):
@@ -38,23 +42,18 @@ class RtmBot(object):
             for output in plugin.do_output():
                 channel = self.slack_client.server.channels.find(output[0])
                 channel.send_message("%s" % output[1])
-            #plugin.do_output()
-            pass
-            #print self.bot_plugins[plugin].replies()
     def crons(self):
         for plugin in self.bot_plugins:
             plugin.do_jobs()
-            pass
-                #print job
     def load_plugins(self):
         path = os.path.dirname(sys.argv[0])
         sys.path.insert(0, path + "/plugins")
         for plugin in glob.glob(path+'/plugins/*.py'):
-            name = plugin.split('/')[-1].rstrip('.py')
-#            try:
-            self.bot_plugins.append(Plugin(name))
-#            except:
-#                print "error loading plugins"
+            name = plugin.split('/')[-1][:-2]
+            try:
+                self.bot_plugins.append(Plugin(name))
+            except:
+                print "error loading plugin %s" % name
 
 class Plugin(object):
     def __init__(self, name):
@@ -101,9 +100,8 @@ class Job(object):
 
 
 if __name__ == "__main__":
-    proc = {k[8:]: v for k, v in globals().items() if k.startswith("process_")}
     config = yaml.load(file('rtmbot.conf', 'r'))
-
+    debug = config["DEBUG"]
     bot = RtmBot(config["SLACK_TOKEN"])
     bot.start()
 
