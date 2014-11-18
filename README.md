@@ -86,7 +86,7 @@ Plugins can also run methods on a schedule. This allows a plugin to poll for upd
         outputs.append(["C12345667", "hello world"])
 
 ####Plugin misc
-The data is a plugin persists for the life of the rtmbot process. If you need persistent data, you should use something like sqlite or the python pickle libraries.
+The data within a plugin persists for the life of the rtmbot process. If you need persistent data, you should use something like sqlite or the python pickle libraries.
 
 ####Todo:
 Some rtm data should be handled upstream, such as channel and user creation. These should create the proper objects on-the-fly.
