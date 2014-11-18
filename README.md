@@ -57,27 +57,27 @@ Create Plugins
 ####Incoming data
 Plugins are callback based and respond to any event sent via the rtm websocket. To act on an event, create a function definition called process_(api_method) that accepts a single arg. For example, to handle incoming messages:
 
-        def process_message(data):
-                print data
+    def process_message(data):
+        print data
 
 This will print the incoming message json (dict) to the screen where the bot is running.
 
 ####Outgoing data
 Plugins can send messages back to any channel, including direct messages. This is done by appending a two item array to the outputs global array. The first item in the array is the channel ID and the second is the message text. Example that writes "hello world" when the plugin is started:
 
-        outputs = []
-        outputs.append(["C12345667", "hello world"])
+    outputs = []
+    outputs.append(["C12345667", "hello world"])
         
 *Note*: you should always create the outputs array at the start of your program, i.e. ```outputs = []```
 
 ####Timed jobs
 Plugins can also run methods on a schedule. This allows a plugin to poll for updates or perform housekeeping during its lifetime. This is done by appending a two item array to the crontable array. The first item is the interval in seconds and the second item is the method to run. For example, this will print "hello world" every 10 seconds.
 
-        outputs = []
-        crontable = []
-        crontable.append([10, "say_hello"])
-        def say_hello():
-                outputs.append(["C12345667", "hello world"])
+    outputs = []
+    crontable = []
+    crontable.append([10, "say_hello"])
+    def say_hello():
+        outputs.append(["C12345667", "hello world"])
 
 ####Plugin misc
 The data is a plugin persists for the life of the rtmbot process. If you need persistent data, you should use something like sqlite or the python pickle libraries.
