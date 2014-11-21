@@ -44,7 +44,10 @@ class RtmBot(object):
         for plugin in self.bot_plugins:
             for output in plugin.do_output():
                 channel = self.slack_client.server.channels.find(output[0])
-                channel.send_message("%s" % output[1])
+                if channel != None:
+                    channel.send_message("%s" % output[1])
+                else:
+                    raise UnknownChannel
     def crons(self):
         for plugin in self.bot_plugins:
             plugin.do_jobs()
@@ -52,7 +55,8 @@ class RtmBot(object):
         path = os.path.dirname(sys.argv[0])
         for plugin in glob.glob(path+'/plugins/*'):
             sys.path.insert(0, plugin)
-        for plugin in glob.glob(path+'/plugins/*/*.py'):
+            sys.path.insert(0, path+'/plugins/')
+        for plugin in glob.glob(path+'/plugins/*.py') + glob.glob(path+'/plugins/*/*.py'):
             print plugin
             name = plugin.split('/')[-1][:-2]
 #            try:
@@ -114,6 +118,9 @@ class Job(object):
             self.function()
             self.lastrun = time.time()
             pass
+
+class UnknownChannel(Exception):
+    pass
 
 
 if __name__ == "__main__":
