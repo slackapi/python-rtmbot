@@ -1,7 +1,14 @@
+import os
+import pickle
+
 outputs = []
 crontabs = []
 
 tasks = {}
+
+FILE="plugins/todo.data"
+if os.path.isfile(FILE):
+    tasks = pickle.load(open(FILE, 'rb'))
 
 def process_message(data):
     global tasks
@@ -29,3 +36,4 @@ def process_message(data):
             tasks[channel].pop(num)
         if text == "show":
             print tasks
+        pickle.dump(tasks, open(FILE,"wb"))
