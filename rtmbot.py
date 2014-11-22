@@ -37,7 +37,7 @@ class RtmBot(object):
     def input(self, data):
         if "type" in data:
             function_name = "process_" + data["type"]
-            dbg(function_name)
+            dbg("got {}".format(function_name))
             for plugin in self.bot_plugins:
                 plugin.do(function_name, data)
     def output(self):
@@ -45,7 +45,7 @@ class RtmBot(object):
             for output in plugin.do_output():
                 channel = self.slack_client.server.channels.find(output[0])
                 if channel != None:
-                    channel.send_message("%s" % output[1])
+                    channel.send_message("{}".format(output[1]))
                 else:
                     raise UnknownChannel
     def crons(self):
@@ -80,10 +80,14 @@ class Plugin(object):
             self.module.crontable = []
     def do(self, function_name, data):
         if function_name in dir(self.module):
-            try:
+            #this makes the plugin fail with stack trace in debug mode
+            if not debug:
+                try:
+                    eval("self.module."+function_name)(data)
+                except:
+                    dbg("problem in module {} {}".format(function_name, data))
+            else:
                 eval("self.module."+function_name)(data)
-            except:
-                dbg("problem in module")
         if "catch_all" in dir(self.module):
             try:
                 self.module.catch_all(data)
@@ -110,7 +114,7 @@ class Job(object):
         self.interval = interval
         self.lastrun = 0
     def __str__(self):
-        return "%s %s %s" % (self.function, self.interval, self.lastrun)
+        return "{} {} {}".format(self.function, self.interval, self.lastrun)
     def __repr__(self):
         return self.__str__()
     def check(self):
