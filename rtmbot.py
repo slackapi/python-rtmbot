@@ -119,7 +119,13 @@ class Job(object):
         return self.__str__()
     def check(self):
         if self.lastrun + self.interval < time.time():
-            self.function()
+            if not debug:
+                try:
+                    self.function()
+                except:
+                    dbg("problem")
+            else:
+                self.function()
             self.lastrun = time.time()
             pass
 
