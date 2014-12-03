@@ -42,10 +42,15 @@ class RtmBot(object):
                 plugin.do(function_name, data)
     def output(self):
         for plugin in self.bot_plugins:
+            limiter = False
             for output in plugin.do_output():
                 channel = self.slack_client.server.channels.find(output[0])
-                if channel != None:
+                if channel != None and output[1] != None:
+                    if limiter == True:
+                        time.sleep(1)
+                        limiter = False
                     channel.send_message("{}".format(output[1]))
+                    limiter = True
                 else:
                     raise UnknownChannel
     def crons(self):
