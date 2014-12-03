@@ -51,8 +51,6 @@ class RtmBot(object):
                         limiter = False
                     channel.send_message("{}".format(output[1]))
                     limiter = True
-                else:
-                    raise UnknownChannel
     def crons(self):
         for plugin in self.bot_plugins:
             plugin.do_jobs()
