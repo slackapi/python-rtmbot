@@ -7,8 +7,9 @@ Python-rtmbot is a callback based bot engine. The plugins architecture should be
 Some differences to webhooks:
 
 1. Doesn't require a webserver to receive messages
-2. Logs in as a slack user (or bot)
-3. Bot users must be invited to a channel
+2. Can respond to direct messages from users
+3. Logs in as a slack user (or bot)
+4. Bot users must be invited to a channel
 
 Dependencies
 ----------
