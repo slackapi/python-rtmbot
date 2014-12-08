@@ -1,2 +1,3 @@
+pyyaml
 websocket-client
-git+ssh://git@github.com/slackhq/python-slackclient.git@master#egg=python-slackclient
+git+https://github.com/slackhq/python-slackclient.git
