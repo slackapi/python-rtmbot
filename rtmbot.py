@@ -24,12 +24,12 @@ class RtmBot(object):
     def connect(self):
         """Convenience method that creates Server instance"""
         self.slack_client = SlackClient(self.token)
-        self.slack_client.connect()
+        self.slack_client.rtm_connect()
     def start(self):
         self.connect()
         self.load_plugins()
         while True:
-            for reply in self.slack_client.read():
+            for reply in self.slack_client.rtm_read():
                 self.input(reply)
             self.crons()
             self.output()
