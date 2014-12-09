@@ -28,7 +28,7 @@ Installation
 
         pip install -r requirements.txt
 
-3. Configure rtmbot (token can be found at https://api.slack.com/web)
+3. Configure rtmbot (https://api.slack.com/bot-users)
         
         cp doc/example-config/rtmbot.conf .
         vi rtmbot.conf
