@@ -40,6 +40,7 @@ class RtmBot(object):
             function_name = "process_" + data["type"]
             dbg("got {}".format(function_name))
             for plugin in self.bot_plugins:
+                plugin.register_jobs()
                 plugin.do(function_name, data)
     def output(self):
         for plugin in self.bot_plugins:
@@ -84,6 +85,7 @@ class Plugin(object):
             for interval, function in self.module.crontable:
                 self.jobs.append(Job(interval, eval("self.module."+function)))
             logging.info(self.module.crontable)
+            self.module.crontable = []
         else:
             self.module.crontable = []
     def do(self, function_name, data):
