@@ -1,4 +1,5 @@
 requests
+python-daemon
 pyyaml
 websocket-client
 git+https://github.com/slackhq/python-slackclient.git

@@ -19,24 +19,16 @@ Dependencies
 Installation
 -----------
 
-1. Download and install the python-slackclient and websocket-client libraries
-
-        git clone https://github.com/liris/websocket-client.git
-        cd websocket-client
-        sudo python setup.py install
-        cd ..
-        git clone git@github.com:slackhq/python-slackclient.git
-        cd python-slackclient
-        sudo python setup.py install
-        cd ..
-
-2. Download the python-rtmbot code
+1. Download the python-rtmbot code
 
         git clone git@github.com:slackhq/python-rtmbot.git
         cd python-rtmbot
 
+2. Install dependencies ([virtualenv](http://virtualenv.readthedocs.org/en/latest/) is recommended.)
 
-3. Configure rtmbot
+        pip install -r requirements.txt
+
+3. Configure rtmbot (https://api.slack.com/bot-users)
         
         cp doc/example-config/rtmbot.conf .
         vi rtmbot.conf

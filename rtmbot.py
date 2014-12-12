@@ -9,12 +9,13 @@ import json
 import os
 import sys
 import time
+import logging
 
 from slackclient import SlackClient
 
 def dbg(debug_string):
     if debug:
-        print debug_string
+        logging.info(debug_string)
 
 class RtmBot(object):
     def __init__(self, token):
@@ -55,30 +56,34 @@ class RtmBot(object):
         for plugin in self.bot_plugins:
             plugin.do_jobs()
     def load_plugins(self):
-        path = os.path.dirname(sys.argv[0])
-        for plugin in glob.glob(path+'/plugins/*'):
+        for plugin in glob.glob(directory+'/plugins/*'):
             sys.path.insert(0, plugin)
-            sys.path.insert(0, path+'/plugins/')
-        for plugin in glob.glob(path+'/plugins/*.py') + glob.glob(path+'/plugins/*/*.py'):
-            print plugin
-            name = plugin.split('/')[-1][:-2]
+            sys.path.insert(0, directory+'/plugins/')
+        for plugin in glob.glob(directory+'/plugins/*.py') + glob.glob(directory+'/plugins/*/*.py'):
+            logging.info(plugin)
+            name = plugin.split('/')[-1][:-3]
 #            try:
             self.bot_plugins.append(Plugin(name))
 #            except:
 #                print "error loading plugin %s" % name
 
 class Plugin(object):
-    def __init__(self, name):
+    def __init__(self, name, plugin_config={}):
         self.name = name
         self.jobs = []
         self.module = __import__(name)
         self.register_jobs()
         self.outputs = []
+        if name in config:
+            logging.info("config found for: " + name)
+            self.module.config = config[name]
+        if 'setup' in dir(self.module):
+            self.module.setup()
     def register_jobs(self):
         if 'crontable' in dir(self.module):
             for interval, function in self.module.crontable:
                 self.jobs.append(Job(interval, eval("self.module."+function)))
-            print self.module.crontable
+            logging.info(self.module.crontable)
         else:
             self.module.crontable = []
     def do(self, function_name, data):
@@ -104,6 +109,7 @@ class Plugin(object):
         while True:
             if 'outputs' in dir(self.module):
                 if len(self.module.outputs) > 0:
+                    logging.info("output from {}".format(self.module))
                     output.append(self.module.outputs.pop(0))
                 else:
                     break
@@ -136,9 +142,34 @@ class UnknownChannel(Exception):
     pass
 
 
+def main_loop():
+    logging.basicConfig(filename=config["LOGFILE"], level=logging.INFO, format='%(asctime)s %(message)s')
+    logging.info(directory)
+    try:
+        bot.start()
+    except KeyboardInterrupt:
+        sys.exit(0)
+    except:
+        logging.exception('OOPS')
+
 if __name__ == "__main__":
+    directory = os.path.dirname(sys.argv[0])
+    if not directory.startswith('/'):
+        directory = os.path.abspath("{}/{}".format(os.getcwd(),
+                                directory
+                                ))
+
     config = yaml.load(file('rtmbot.conf', 'r'))
     debug = config["DEBUG"]
     bot = RtmBot(config["SLACK_TOKEN"])
-    bot.start()
+    site_plugins = []
+    files_currently_downloading = []
+    job_hash = {}
+
+    if config.has_key("DAEMON"):
+        if config["DAEMON"]:
+            import daemon
+            with daemon.DaemonContext():
+                main_loop()
+    main_loop()
 
