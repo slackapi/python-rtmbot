@@ -143,7 +143,8 @@ class UnknownChannel(Exception):
 
 
 def main_loop():
-    logging.basicConfig(filename=config["LOGFILE"], level=logging.INFO, format='%(asctime)s %(message)s')
+    if "LOGFILE" in config:
+        logging.basicConfig(filename=config["LOGFILE"], level=logging.INFO, format='%(asctime)s %(message)s')
     logging.info(directory)
     try:
         bot.start()
