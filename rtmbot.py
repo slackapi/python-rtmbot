@@ -58,12 +58,13 @@ class RtmBot(object):
         for plugin in self.bot_plugins:
             plugin.do_jobs()
     def load_plugins(self):
-        for plugin in glob.glob(directory+'/plugins/*'):
+        plugin_dir = os.path.join(directory, 'plugins')
+        for plugin in glob.glob(os.path.join(plugin_dir, '*')):
             sys.path.insert(0, plugin)
-            sys.path.insert(0, directory+'/plugins/')
-        for plugin in glob.glob(directory+'/plugins/*.py') + glob.glob(directory+'/plugins/*/*.py'):
+            sys.path.insert(0, plugin_dir)
+        for plugin in glob.glob(os.path.join(plugin_dir, '*.py')) + glob.glob(os.path.join(plugin_dir, '*', '*.py')):
             logging.info(plugin)
-            name = plugin.split('/')[-1][:-3]
+            name = plugin.split(os.sep)[-1][:-3]
 #            try:
             self.bot_plugins.append(Plugin(name))
 #            except:
@@ -157,11 +158,7 @@ def main_loop():
         logging.exception('OOPS')
 
 if __name__ == "__main__":
-    directory = os.path.dirname(sys.argv[0])
-    if not directory.startswith('/'):
-        directory = os.path.abspath("{}/{}".format(os.getcwd(),
-                                directory
-                                ))
+    directory = os.path.abspath(os.path.dirname(sys.argv[0]))
 
     config = yaml.load(file('rtmbot.conf', 'r'))
     debug = config["DEBUG"]
