@@ -19,6 +19,7 @@ def dbg(debug_string):
 
 class RtmBot(object):
     def __init__(self, token):
+        self.last_ping = 0
         self.token = token
         self.bot_plugins = []
         self.slack_client = None
@@ -34,7 +35,15 @@ class RtmBot(object):
                 self.input(reply)
             self.crons()
             self.output()
+            self.autoping()
             time.sleep(.1)
+    def autoping(self):
+        #hardcode the interval to 3 seconds
+        now = int(time.time())
+        if now > self.last_ping + 3:
+            print 'ping'
+            self.slack_client.server.ping()
+            self.last_ping = now
     def input(self, data):
         if "type" in data:
             function_name = "process_" + data["type"]
