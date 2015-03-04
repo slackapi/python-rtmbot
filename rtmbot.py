@@ -41,7 +41,6 @@ class RtmBot(object):
         #hardcode the interval to 3 seconds
         now = int(time.time())
         if now > self.last_ping + 3:
-            print 'ping'
             self.slack_client.server.ping()
             self.last_ping = now
     def input(self, data):
