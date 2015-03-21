@@ -154,8 +154,8 @@ class UnknownChannel(Exception):
 
 
 def main_loop():
-    if "LOGFILE" in config:
-        logging.basicConfig(filename=config["LOGFILE"], level=logging.INFO, format='%(asctime)s %(message)s')
+    if logfile_path:
+        logging.basicConfig(filename=logfile_path, level=logging.INFO, format='%(asctime)s %(message)s')
     logging.info(directory)
     try:
         bot.start()
@@ -171,17 +171,26 @@ if __name__ == "__main__":
                                 directory
                                 ))
 
-    config = yaml.load(file('rtmbot.conf', 'r'))
-    debug = config["DEBUG"]
-    bot = RtmBot(config["SLACK_TOKEN"])
+    if os.environ.get('RTMBOT_SLACK_TOKEN', False):
+        config = yaml.load(file('rtmbot.conf', 'r'))
+        slack_token_value = config['SLACK_TOKEN']
+        debug = config['DEBUG']
+        run_as_daemon = True if 'DAEMON' in config else False
+        logfile_path = config['LOGFILE'] if 'LOGFILE' in config else False
+    else:
+        config = {}
+        slack_token_value = os.environ.get('RTMBOT_SLACK_TOKEN', '')
+        debug = os.environ.get('RTMBOT_DEBUG', 'False')
+        run_as_daemon = True if os.environ.get('RTMBOT_DAEMON', False) else False
+        logfile_path = os.environ.get('RTMBOT_LOGFILE_PATH') if os.environ.get('RTMBOT_LOGFILE_PATH', False) else False
+
+    bot = RtmBot(slack_token_value)
     site_plugins = []
     files_currently_downloading = []
     job_hash = {}
 
-    if config.has_key("DAEMON"):
-        if config["DAEMON"]:
-            import daemon
-            with daemon.DaemonContext():
-                main_loop()
+    if run_as_daemon:
+        import daemon
+        with daemon.DaemonContext():
+            main_loop()
     main_loop()
-
