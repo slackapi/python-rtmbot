@@ -62,8 +62,8 @@ class RtmBot(object):
             limiter = False
             for output in plugin.do_output():
                 channel = self.slack_client.server.channels.find(output[0])
-                if channel != None and output[1] != None:
-                    if limiter == True:
+                if channel is not None and output[1] is not None:
+                    if limiter:
                         time.sleep(.1)
                         limiter = False
                     message = output[1].encode('ascii', 'ignore')
@@ -78,7 +78,8 @@ class RtmBot(object):
         for plugin in glob.glob(directory+'/plugins/*'):
             sys.path.insert(0, plugin)
             sys.path.insert(0, directory+'/plugins/')
-        for plugin in glob.glob(directory+'/plugins/*.py') + glob.glob(directory+'/plugins/*/*.py'):
+        for plugin in (glob.glob(directory+'/plugins/*.py') +
+                       glob.glob(directory+'/plugins/*/*.py')):
             logging.info(plugin)
             name = plugin.split('/')[-1][:-3]
 #            try:
@@ -196,9 +197,10 @@ if __name__ == "__main__":
     files_currently_downloading = []
     job_hash = {}
 
-    if config.has_key("DAEMON"):
-        if config["DAEMON"]:
-            import daemon
-            with daemon.DaemonContext():
-                main_loop()
+    # If the DAEMON key is present and truthy
+    if "DAEMON" in config and config["DAEMON"]:
+        import daemon
+        with daemon.DaemonContext():
+            main_loop()
+
     main_loop()
