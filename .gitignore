@@ -1,3 +1,6 @@
-*.pyc
+*.py[co]
 /rtmbot.conf
 env
+
+# SQLite db files
+*.db
