@@ -1,4 +1,3 @@
 *.pyc
 /rtmbot.conf
-/plugins/**
 env
