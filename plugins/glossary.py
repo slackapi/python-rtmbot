@@ -106,12 +106,19 @@ def process_message(data):
     if command not in COMMANDS:
         pass
     elif command == '!define':
-        term_and_def = text.split(" ", 1)[1]
-        term, definition = term_and_def.split(":", 1)
+        try:
+            term_and_def = text.split(" ", 1)[1]
+            term, definition = term_and_def.split(":", 1)
+        except (ValueError, IndexError):
+            sender("Need a term to define! Usage: `!define <term>: <definition>`")
+            pass
         res = define(term.strip(), definition.strip())
         handle_definition_result(res, sender)
     elif command == '!whatis':
-        term = text.split(" ")[1].strip()
+        try:
+            term = text.split(" ", 1)[1].strip()
+        except IndexError:
+            sender("No term sent! Usage: `!whatis <term>`")
         defns = whatis(term)
         handle_whatis_result(defns, sender)
     else:
