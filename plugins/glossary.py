@@ -25,7 +25,7 @@ def define(term, definition):
     """Define a term"""
     session = db.get_session()
     new_definition = Definition(term=term, definition=definition)
-    print session
+
     try:
         session.add(new_definition)
         session.commit()
@@ -69,7 +69,7 @@ def handle_multi_defn(defs):
 def handle_definition_result(result):
     """ Return a response, depending on definition result"""
     success = "Okay! {term} is now defined as, '{definition}'".format
-    failure = "Erk! Something went wrong :-/ Check the logs?"
+    failure = "Erk! Something went wrong :-/ Check the logs? (lol j/k no logs yet -_-)"
 
     worked, term, definition = result
 
@@ -84,9 +84,9 @@ def process_messages(data):
     """Process an incoming message from Slack"""
     text = data["text"]
     command = text.split(" ")[0]
-    print command
+
     if command not in COMMANDS:
-        print "Command {} not recognized".format(command)
+        pass
     elif command == '!define':
         term_and_def = text.split(" ", 1)[1]
         term, definition = term_and_def.split(":", 1)
