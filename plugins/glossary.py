@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+import logging
+import traceback
+
 import db
 from models import Definition
 
@@ -12,7 +15,7 @@ def make_sender(channel_id):
     def sender(msg):
         outputs.append([channel_id, msg])
 
-    return send
+    return sender
 
 
 def whatis(term):
@@ -50,7 +53,7 @@ def handle_whatis_result(defs, send):
     if len(defs) == 0:
         send("I don't have a definition for that.")
     elif len(defs) == 1:
-        handle_single_defn(defs, send)
+        handle_single_defn(defs[0], send)
     else:
         handle_multi_defn(defs, send)
 
@@ -58,7 +61,7 @@ def handle_whatis_result(defs, send):
 def handle_single_defn(defn, send):
     """"""
     single_defn = '{term}: {definition}'.format
-    send(single_defn(term=defn))
+    send(single_defn(term=defn.term, definition=defn.definition))
 
 
 def handle_multi_defn(defs, send):
@@ -92,8 +95,9 @@ def handle_definition_result(result, send):
 
 def process_message(data):
     """Process an incoming message from Slack"""
-    text = data["text"]
-    channel_id = data["channel_id"]
+
+    text = data['text']
+    channel_id = data['channel']
 
     sender = make_sender(channel_id)
 
@@ -111,4 +115,4 @@ def process_message(data):
         defns = whatis(term)
         handle_whatis_result(defns, sender)
     else:
-        print 'butts'
+        print 'Not implemented'
