@@ -7,12 +7,16 @@ COMMANDS = ['!define', '!whatis']
 
 
 def whatis(term):
-    """ Try to look up a term """
+    """
+    Try to look up a term; returns a list of 0 or more  definitions
+    """
     session = db.get_session()
-    definitions = session \
-        .query(Definition) \
-        .filter(Definition.term == term) \
-        .all() \
+    definitions = (
+        session
+        .query(Definition)
+        .filter(Definition.term == term)
+        .all()
+    )
 
     return definitions
 
