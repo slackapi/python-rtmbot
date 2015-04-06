@@ -38,9 +38,32 @@ def define(term, definition):
 
 def handle_whatis_result(defs):
     """ Do the Right Thing with zero or more Definitions """
+    if len(defs) == 0:
+        print "I don't have a definition for that."
+    elif len(defs) == 1:
+        handle_single_defn(defs)
+    else:
+        handle_multi_defn(defs)
+
+
+def handle_single_defn(defn):
+    """"""
     single_defn = '{term}: {definition}'.format
-    for defn in defs:
-        print single_defn(term=defn.term, definition=defn.definition)
+    print single_defn(term=defn)
+
+
+def handle_multi_defn(defs):
+    """"""
+    num_defs = len(defs)
+    print "Found {} definitions for, '{}'".format(num_defs, defs[0].term)
+    row_template = "{term} ({index}/{total}): {definition}".format
+    for i, defn in enumerate(defs):
+        print row_template(
+            term=defn.term,
+            index=i + 1,
+            total=num_defs,
+            definition=defn.definition
+        )
 
 
 def handle_definition_result(result):
