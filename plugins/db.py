@@ -11,6 +11,8 @@ DB_URI = "sqlite:///doyle_owl.db"
 
 def make_tables():
     """Creates tables for known record types"""
+    engine = create_engine(DB_URI)
+    Base.metadata.bind = engine
     Base.metadata.create_all()
 
 
