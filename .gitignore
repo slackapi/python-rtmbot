@@ -1,4 +1,6 @@
-*.pyc
+*.py[co]
 /rtmbot.conf
-/plugins/**
 env
+
+# SQLite db files
+*.db
