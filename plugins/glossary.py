@@ -90,7 +90,7 @@ def handle_definition_result(result, send):
         send(failure)
 
 
-def process_messages(data):
+def process_message(data):
     """Process an incoming message from Slack"""
     text = data["text"]
     channel_id = data["channel_id"]
