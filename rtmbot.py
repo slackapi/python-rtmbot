@@ -10,6 +10,7 @@ import os
 import sys
 import time
 import logging
+import requests
 
 from slackclient import SlackClient
 
@@ -18,9 +19,10 @@ def dbg(debug_string):
         logging.info(debug_string)
 
 class RtmBot(object):
-    def __init__(self, token):
+    def __init__(self, token, user_token):
         self.last_ping = 0
         self.token = token
+        self.user_token = user_token
         self.bot_plugins = []
         self.slack_client = None
     def connect(self):
@@ -35,6 +37,7 @@ class RtmBot(object):
                 self.input(reply)
             self.crons()
             self.output()
+            self.upload()
             self.autoping()
             time.sleep(.1)
     def autoping(self):
@@ -50,6 +53,17 @@ class RtmBot(object):
             for plugin in self.bot_plugins:
                 plugin.register_jobs()
                 plugin.do(function_name, data)
+    def upload(self):
+        for plugin in self.bot_plugins:
+            for f in plugin.do_upload():
+                data = {'file' : (f['name'], f['file'])}
+                # Basic support for options
+                params = {'channels' : f['channels'], 'title' : f['title'], 'initial_comment' : f['initial_comment']}
+                # Need a user token to upload files
+                if len(self.user_token) > 0:
+                    r = requests.post("https://slack.com/api/files.upload?token=" + str(self.user_token), files=data, params=params)
+                else:
+                    logging.info("User Token required for file upload")
     def output(self):
         for plugin in self.bot_plugins:
             limiter = False
@@ -84,6 +98,7 @@ class Plugin(object):
         self.module = __import__(name)
         self.register_jobs()
         self.outputs = []
+        self.files = []
         if name in config:
             logging.info("config found for: " + name)
             self.module.config = config[name]
@@ -93,7 +108,8 @@ class Plugin(object):
         if 'crontable' in dir(self.module):
             for interval, function in self.module.crontable:
                 self.jobs.append(Job(interval, eval("self.module."+function)))
-            logging.info(self.module.crontable)
+            if len(self.module.crontable) > 0:
+                logging.info(self.module.crontable)
             self.module.crontable = []
         else:
             self.module.crontable = []
@@ -115,6 +131,18 @@ class Plugin(object):
     def do_jobs(self):
         for job in self.jobs:
             job.check()
+    def do_upload(self):
+        files = []
+        while True:
+            if 'files' in dir(self.module):
+                if len(self.module.files) > 0:
+                    logging.info("uploading file from {}".format(self.module))
+                    files.append(self.module.files.pop(0))
+                else:
+                    break
+            else:
+                self.module.files = []
+        return files
     def do_output(self):
         output = []
         while True:
@@ -173,7 +201,7 @@ if __name__ == "__main__":
 
     config = yaml.load(file('rtmbot.conf', 'r'))
     debug = config["DEBUG"]
-    bot = RtmBot(config["SLACK_TOKEN"])
+    bot = RtmBot(config["SLACK_TOKEN"], config["USER_TOKEN"])
     site_plugins = []
     files_currently_downloading = []
     job_hash = {}
