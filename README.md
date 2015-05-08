@@ -71,6 +71,20 @@ Plugins can send messages back to any channel, including direct messages. This i
         
 *Note*: you should always create the outputs array at the start of your program, i.e. ```outputs = []```
 
+####Uploading files
+Plugins can upload files to any channel, including direct messages. This is done by appending a dictionary to the files global array. The dictionary must have the items: file, name, channels, title, initial_comment.
+
+    files = []
+    data = {}
+    data['file'] = '<The File Data>'
+    data['name'] = "filename.txt"
+    data['channels'] = "C12345667"
+    data['title'] = "My sample file"
+    data['initial_comment'] = "My first file, yay!"
+    files.append(data)
+        
+*Note*: you should always create the files array at the start of your program, i.e. ```files = []```
+
 ####Timed jobs
 Plugins can also run methods on a schedule. This allows a plugin to poll for updates or perform housekeeping during its lifetime. This is done by appending a two item array to the crontable array. The first item is the interval in seconds and the second item is the method to run. For example, this will print "hello world" every 10 seconds.
 
