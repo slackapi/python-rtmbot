@@ -10,6 +10,7 @@ import os
 import sys
 import time
 import logging
+from argparse import ArgumentParser
 
 from slackclient import SlackClient
 
@@ -164,14 +165,27 @@ def main_loop():
     except:
         logging.exception('OOPS')
 
+
+def parse_args():
+    parser = ArgumentParser()
+    parser.add_argument(
+        '-c',
+        '--config',
+        help='Full path to config file.',
+        metavar='path'
+    )
+    return parser.parse_args()
+
+
 if __name__ == "__main__":
+    args = parse_args()
     directory = os.path.dirname(sys.argv[0])
     if not directory.startswith('/'):
         directory = os.path.abspath("{}/{}".format(os.getcwd(),
                                 directory
                                 ))
 
-    config = yaml.load(file('rtmbot.conf', 'r'))
+    config = yaml.load(file(args.config or 'rtmbot.conf', 'r'))
     debug = config["DEBUG"]
     bot = RtmBot(config["SLACK_TOKEN"])
     site_plugins = []
