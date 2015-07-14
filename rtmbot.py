@@ -74,7 +74,7 @@ class RtmBot(object):
             logging.info(plugin)
             name = plugin.split('/')[-1][:-3]
 #            try:
-            self.bot_plugins.append(Plugin(name))
+            self.bot_plugins.append(Plugin(name, config))
 #            except:
 #                print "error loading plugin %s" % name
 
