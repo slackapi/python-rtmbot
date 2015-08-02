@@ -18,4 +18,9 @@ def parse_args():
 args = parse_args()
 config = yaml.load(file(args.config or 'rtmbot.conf', 'r'))
 bot = RtmBot(config)
-bot.start()
+try:
+    bot.start()
+except KeyboardInterrupt:
+    sys.exit(0)
+except:
+    logging.exception('OOPS')
