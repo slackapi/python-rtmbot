@@ -110,7 +110,8 @@ class RtmBot(object):
 #            try:
             if name in self.config:
                 logging.info("config found for: " + name)
-            plugin_config = self.config.get(name)
+            plugin_config = self.config.get(name, {})
+            plugin_config['DEBUG'] = self.debug
             self.bot_plugins.append(Plugin(name, plugin_config))
 #            except:
 #                print "error loading plugin %s" % name
@@ -121,6 +122,7 @@ class Plugin(object):
         self.jobs = []
         self.module = __import__(name)
         self.module.config = plugin_config
+        self.debug = self.module.config.get('DEBUG')
         self.register_jobs()
         self.outputs = []
         if 'setup' in dir(self.module):
@@ -138,7 +140,7 @@ class Plugin(object):
     def do(self, function_name, data):
         if function_name in dir(self.module):
             #this makes the plugin fail with stack trace in debug mode
-            if not debug:
+            if not self.debug:
                 try:
                     eval("self.module."+function_name)(data)
                 except:
