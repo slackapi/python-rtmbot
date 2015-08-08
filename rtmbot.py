@@ -109,10 +109,13 @@ class Plugin(object):
             else:
                 eval("self.module."+function_name)(data)
         if "catch_all" in dir(self.module):
-            try:
+            if not debug:
+                try:
+                    self.module.catch_all(data)
+                except:
+                    dbg("problem in catch all")
+            else:
                 self.module.catch_all(data)
-            except:
-                dbg("problem in catch all")
     def do_jobs(self):
         for job in self.jobs:
             job.check()
