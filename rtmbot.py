@@ -39,7 +39,7 @@ class RtmBot(object):
             self.autoping()
             time.sleep(.1)
     def autoping(self):
-        #hardcode the interval to 3 seconds
+        # hardcode the interval to 3 seconds
         now = int(time.time())
         if now > self.last_ping + 3:
             self.slack_client.server.ping()
@@ -73,10 +73,8 @@ class RtmBot(object):
         for plugin in glob.glob(directory+'/plugins/*.py') + glob.glob(directory+'/plugins/*/*.py'):
             logging.info(plugin)
             name = plugin.split('/')[-1][:-3]
-#            try:
             self.bot_plugins.append(Plugin(name))
-#            except:
-#                print "error loading plugin %s" % name
+
 
 class Plugin(object):
     def __init__(self, name, plugin_config={}):
@@ -100,7 +98,7 @@ class Plugin(object):
             self.module.crontable = []
     def do(self, function_name, data):
         if function_name in dir(self.module):
-            #this makes the plugin fail with stack trace in debug mode
+            # this makes the plugin fail with stack trace in debug mode
             if not debug:
                 try:
                     eval("self.module."+function_name)(data)
