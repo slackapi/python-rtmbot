@@ -10,6 +10,7 @@ import os
 import sys
 import time
 import logging
+import re
 from argparse import ArgumentParser
 
 from slackclient import SlackClient
@@ -44,10 +45,18 @@ class RtmBot(object):
         if now > self.last_ping + 3:
             self.slack_client.server.ping()
             self.last_ping = now
+    def isBotMention(self, message):
+        botUserName = self.slack_client.server.login_data['self']['id']
+        if re.search("@{}".format(botUserName), message):
+            return True
+        else:
+            return False
     def input(self, data):
         if "type" in data:
             function_name = "process_" + data["type"]
             dbg("got {}".format(function_name))
+            if "text" in data and self.isBotMention(data["text"]):
+                function_name = "process_mention"
             for plugin in self.bot_plugins:
                 plugin.register_jobs()
                 plugin.do(function_name, data)
@@ -61,8 +70,14 @@ class RtmBot(object):
                         time.sleep(.1)
                         limiter = False
                     message = output[1].encode('ascii','ignore')
-                    channel.send_message("{}".format(message))
-                    limiter = True
+                    if message.startswith("__typing__"):
+                        user_typing_json = { "type": "typing", "channel": channel.id}
+                        print user_typing_json
+                        self.slack_client.server.send_to_websocket(user_typing_json)
+                        time.sleep(output[2])
+                    else:
+                        channel.send_message("{}".format(message))
+                        limiter = True
     def crons(self):
         for plugin in self.bot_plugins:
             plugin.do_jobs()
@@ -187,6 +202,9 @@ if __name__ == "__main__":
 
     config = yaml.load(file(args.config or 'rtmbot.conf', 'r'))
     debug = config["DEBUG"]
+    if debug is True:
+        logging.basicConfig(level=logging.DEBUG)
+    logging.info("token: {}".format(config["SLACK_TOKEN"]))
     bot = RtmBot(config["SLACK_TOKEN"])
     site_plugins = []
     files_currently_downloading = []
@@ -198,4 +216,3 @@ if __name__ == "__main__":
             with daemon.DaemonContext():
                 main_loop()
     main_loop()
-
