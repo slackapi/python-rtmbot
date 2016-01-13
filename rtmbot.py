@@ -29,6 +29,10 @@ class RtmBot(object):
         """Convenience method that creates Server instance"""
         self.slack_client = SlackClient(self.token)
         self.slack_client.rtm_connect()
+        print "Connected {} to {} team at https://{}.slack.com".format(
+            self.slack_client.server.username,
+            self.slack_client.server.login_data['team']['name'],
+            self.slack_client.server.domain)
     def start(self):
         self.connect()
         self.load_plugins()
@@ -40,9 +44,9 @@ class RtmBot(object):
             self.autoping()
             time.sleep(.1)
     def autoping(self):
-        #hardcode the interval to 3 seconds
+        #hardcode the interval to 60 seconds
         now = int(time.time())
-        if now > self.last_ping + 3:
+        if now > self.last_ping + 60:
             self.slack_client.server.ping()
             self.last_ping = now
     def isBotMention(self, message):
@@ -100,9 +104,6 @@ class Plugin(object):
         self.module = __import__(name)
         self.register_jobs()
         self.outputs = []
-        if name in config:
-            logging.info("config found for: " + name)
-            self.module.config = config[name]
         if 'setup' in dir(self.module):
             self.module.setup()
     def register_jobs(self):
@@ -170,8 +171,7 @@ class UnknownChannel(Exception):
 
 
 def main_loop():
-    if "LOGFILE" in config:
-        logging.basicConfig(filename=config["LOGFILE"], level=logging.INFO, format='%(asctime)s %(message)s')
+
     logging.info(directory)
     try:
         bot.start()
@@ -181,38 +181,25 @@ def main_loop():
         logging.exception('OOPS')
 
 
-def parse_args():
-    parser = ArgumentParser()
-    parser.add_argument(
-        '-c',
-        '--config',
-        help='Full path to config file.',
-        metavar='path'
-    )
-    return parser.parse_args()
-
-
 if __name__ == "__main__":
-    args = parse_args()
+
     directory = os.path.dirname(sys.argv[0])
     if not directory.startswith('/'):
         directory = os.path.abspath("{}/{}".format(os.getcwd(),
                                 directory
                                 ))
 
-    config = yaml.load(file(args.config or 'rtmbot.conf', 'r'))
-    debug = config["DEBUG"]
-    if debug is True:
+    debug = os.getenv("DEBUG", "False")
+    if debug == "True":
         logging.basicConfig(level=logging.DEBUG)
-    logging.info("token: {}".format(config["SLACK_TOKEN"]))
-    bot = RtmBot(config["SLACK_TOKEN"])
+    slack_token = os.getenv("SLACK_TOKEN", "")
+    logging.info("token: {}".format(slack_token))
+    if slack_token == "":
+        logging.error("SLACK_TOKEN env var not set!")
+        sys.exit(1)
+    bot = RtmBot(slack_token)
     site_plugins = []
     files_currently_downloading = []
     job_hash = {}
 
-    if config.has_key("DAEMON"):
-        if config["DAEMON"]:
-            import daemon
-            with daemon.DaemonContext():
-                main_loop()
     main_loop()
