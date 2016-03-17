@@ -21,7 +21,7 @@ Installation
 
 1. Download the python-rtmbot code
 
-        git clone git@github.com:slackhq/python-rtmbot.git
+        git clone https://github.com/slackhq/python-rtmbot.git
         cd python-rtmbot
 
 2. Install dependencies ([virtualenv](http://virtualenv.readthedocs.org/en/latest/) is recommended.)
