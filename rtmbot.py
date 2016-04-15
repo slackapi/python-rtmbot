@@ -1,17 +1,16 @@
 #!/usr/bin/env python
-
 import sys
-
-sys.dont_write_bytecode = True
-
 import glob
 import yaml
 import os
 import time
 import logging
+
 from argparse import ArgumentParser
 
 from slackclient import SlackClient
+
+sys.dont_write_bytecode = True
 
 
 def dbg(debug_string):
@@ -66,13 +65,13 @@ class RtmBot(object):
                     if limiter:
                         time.sleep(.1)
                         limiter = False
-                    message = output[1].encode('ascii','ignore')
+                    message = output[1].encode('ascii', 'ignore')
                     channel.send_message("{}".format(message))
-                    limiter = True  # TODO: check goal: no sleep for 1st channel, sleep of all after ?
+                    limiter = True
+                    # TODO: check goal: no sleep for 1st channel, sleep of all after ?
                     # TODO: find out how to safely encode stuff if needed :(
                     # message = output[1].encode('utf-8','ignore')
                     channel.send_message(output[1])  # message
-
 
     def crons(self):
         for plugin in self.bot_plugins:
@@ -82,7 +81,8 @@ class RtmBot(object):
         for plugin in glob.glob(directory + '/plugins/*'):
             sys.path.insert(0, plugin)
             sys.path.insert(0, directory + '/plugins/')
-        for plugin in glob.glob(directory + '/plugins/*.py') + glob.glob(directory + '/plugins/*/*.py'):
+        for plugin in glob.glob(directory + '/plugins/*.py') + \
+                glob.glob(directory + '/plugins/*/*.py'):
             logging.info(plugin)
             name = plugin.split('/')[-1][:-3]
             # try:
@@ -90,10 +90,12 @@ class RtmBot(object):
             # except:
             #   print "error loading plugin %s" % name
 
+
 class Plugin(object):
+
     def __init__(self, name, plugin_config=None):
         if plugin_config is None:
-            plugin_config = {} #TODO: is this necessary?
+            plugin_config = {}  # TODO: is this necessary?
         self.name = name
         self.jobs = []
         self.module = __import__(name)
@@ -179,7 +181,11 @@ class UnknownChannel(Exception):
 
 def main_loop():
     if "LOGFILE" in config:
-        logging.basicConfig(filename=config["LOGFILE"], level=logging.INFO, format='%(asctime)s %(message)s')
+        logging.basicConfig(
+            filename=config["LOGFILE"],
+            level=logging.INFO,
+            format='%(asctime)s %(message)s'
+        )
     logging.info(directory)
     try:
         bot.start()
@@ -215,7 +221,7 @@ if __name__ == "__main__":
     files_currently_downloading = []
     job_hash = {}
 
-    if config.has_key("DAEMON"):
+    if 'DAEMON' in config:
         if config["DAEMON"]:
             import daemon
 
