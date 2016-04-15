@@ -1,6 +1,5 @@
-import time
-crontable = []
 outputs = []
+
 
 def process_message(data):
     if data['channel'].startswith("D"):
