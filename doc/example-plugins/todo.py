@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os
 import pickle
 
@@ -37,5 +38,5 @@ def process_message(data):
             num = int(text.split()[1]) - 1
             tasks[channel].pop(num)
         if text == "show":
-            print tasks
+            print(tasks)
         pickle.dump(tasks, open(FILE, "wb"))
