@@ -7,7 +7,6 @@ sys.dont_write_bytecode = True
 import glob
 import yaml
 import os
-import sys
 import time
 import logging
 from argparse import ArgumentParser
@@ -66,6 +65,9 @@ class RtmBot(object):
                 if channel is not None and output[1] is not None:
                     if limiter:
                         time.sleep(.1)
+                        limiter = False
+                    message = output[1].encode('ascii','ignore')
+                    channel.send_message("{}".format(message))
                     limiter = True  # TODO: check goal: no sleep for 1st channel, sleep of all after ?
                     # TODO: find out how to safely encode stuff if needed :(
                     # message = output[1].encode('utf-8','ignore')
@@ -89,7 +91,9 @@ class RtmBot(object):
             #   print "error loading plugin %s" % name
 
 class Plugin(object):
-    def __init__(self, name):
+    def __init__(self, name, plugin_config=None):
+        if plugin_config is None:
+            plugin_config = {} #TODO: is this necessary?
         self.name = name
         self.jobs = []
         self.module = __import__(name)
@@ -115,11 +119,11 @@ class Plugin(object):
             # this makes the plugin fail with stack trace in debug mode
             if not debug:
                 try:
-                    eval("self.module." + function_name)(data, bot, config)
+                    eval("self.module." + function_name)(data)
                 except:
                     dbg("problem in module {} {}".format(function_name, data))
             else:
-                eval("self.module." + function_name)(data, bot, config)
+                eval("self.module." + function_name)(data)
         if "catch_all" in dir(self.module):
             try:
                 self.module.catch_all(data)

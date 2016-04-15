@@ -3,4 +3,3 @@ python-daemon
 pyyaml
 websocket-client
 slackclient
-deamon
