@@ -2,3 +2,4 @@
 /rtmbot.conf
 /plugins/**
 env
+.tox
