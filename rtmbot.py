@@ -68,10 +68,6 @@ class RtmBot(object):
                     message = output[1].encode('ascii', 'ignore')
                     channel.send_message("{}".format(message))
                     limiter = True
-                    # TODO: check goal: no sleep for 1st channel, sleep of all after ?
-                    # TODO: find out how to safely encode stuff if needed :(
-                    # message = output[1].encode('utf-8','ignore')
-                    channel.send_message(output[1])  # message
 
     def crons(self):
         for plugin in self.bot_plugins:
@@ -95,7 +91,7 @@ class Plugin(object):
 
     def __init__(self, name, plugin_config=None):
         if plugin_config is None:
-            plugin_config = {}  # TODO: is this necessary?
+            plugin_config = {}  # TODO: is this variable necessary?
         self.name = name
         self.jobs = []
         self.module = __import__(name)
