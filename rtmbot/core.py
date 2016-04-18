@@ -121,8 +121,15 @@ class RtmBot(object):
 class Plugin(object):
 
     def __init__(self, name, plugin_config=None):
+        '''
+        A plugin in initialized with:
+            - name (str)
+            - plugin config (dict) - (from the yaml config)
+                Values in config:
+                - DEBUG (bool) - this will be overridden if debug is set in config for this plugin
+        '''
         if plugin_config is None:
-            plugin_config = {}  # TODO: is this variable necessary?
+            plugin_config = {}
         self.name = name
         self.jobs = []
         self.module = __import__(name)
@@ -136,7 +143,7 @@ class Plugin(object):
     def register_jobs(self):
         if 'crontable' in dir(self.module):
             for interval, function in self.module.crontable:
-                self.jobs.append(Job(interval, eval("self.module." + function)))
+                self.jobs.append(Job(interval, eval("self.module." + function), self.debug))
             logging.info(self.module.crontable)
             self.module.crontable = []
         else:
@@ -177,10 +184,11 @@ class Plugin(object):
 
 
 class Job(object):
-    def __init__(self, interval, function):
+    def __init__(self, interval, function, debug):
         self.function = function
         self.interval = interval
         self.lastrun = 0
+        self.debug = debug
 
     def __str__(self):
         return "{} {} {}".format(self.function, self.interval, self.lastrun)
@@ -190,11 +198,11 @@ class Job(object):
 
     def check(self):
         if self.lastrun + self.interval < time.time():
-            if not debug: # TODO: This isn't in scope any more
+            if self.debug is False:
                 try:
                     self.function()
                 except:
-                    self._dbg("problem")
+                    logging.debug("Problem in job check")
             else:
                 self.function()
             self.lastrun = time.time()
