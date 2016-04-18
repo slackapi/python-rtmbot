@@ -32,7 +32,7 @@ Installation
         pip install -r requirements.txt
 
 3. Configure rtmbot (https://api.slack.com/bot-users)
-        
+
         cp doc/example-config/rtmbot.conf .
         vi rtmbot.conf
           SLACK_TOKEN: "xoxb-11111111111-222222222222222"
@@ -51,7 +51,7 @@ To install the example 'repeat' plugin
 
 The repeat plugin will now be loaded by the bot on startup.
 
-    ./rtmbot.py
+    ./start_rtmbot.py
 
 Create Plugins
 --------
@@ -71,7 +71,7 @@ Plugins can send messages back to any channel, including direct messages. This i
 
     outputs = []
     outputs.append(["C12345667", "hello world"])
-        
+
 *Note*: you should always create the outputs array at the start of your program, i.e. ```outputs = []```
 
 ####Timed jobs
