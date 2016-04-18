@@ -14,8 +14,6 @@ class RtmBot(object):
     def __init__(self, config):
         # set the config object
         self.config = config
-        global site_config
-        site_config = self.config
 
         # set slack token
         self.token = config.get('SLACK_TOKEN')
