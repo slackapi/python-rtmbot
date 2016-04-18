@@ -31,10 +31,7 @@ class RtmBot(object):
                             level=logging.INFO,
                             format='%(asctime)s %(message)s')
         logging.info(self.directory)
-        if 'DEBUG' in self.config:
-            self.debug = self.config.get('DEBUG')
-        else:
-            self.debug = False
+        self.debug = self.config.get('DEBUG', False)
 
         # initialize stateful fields
         self.last_ping = 0
@@ -132,7 +129,7 @@ class Plugin(object):
         self.jobs = []
         self.module = __import__(name)
         self.module.config = plugin_config
-        self.debug = self.module.config.get('DEBUG')
+        self.debug = self.module.config.get('DEBUG', False)
         self.register_jobs()
         self.outputs = []
         if 'setup' in dir(self.module):
@@ -150,7 +147,7 @@ class Plugin(object):
     def do(self, function_name, data):
         if function_name in dir(self.module):
             # this makes the plugin fail with stack trace in debug mode
-            if not self.debug:
+            if self.debug is False:
                 try:
                     eval("self.module." + function_name)(data)
                 except:
