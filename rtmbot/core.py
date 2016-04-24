@@ -146,19 +146,24 @@ class Plugin(object):
 
     def do(self, function_name, data):
         if function_name in dir(self.module):
-            # this makes the plugin fail with stack trace in debug mode
-            if self.debug is False:
+            if self.debug is True:
+                # this makes the plugin fail with stack trace in debug mode
+                eval("self.module." + function_name)(data)
+            else:
+                # otherwise we log the exception and carry on
                 try:
                     eval("self.module." + function_name)(data)
-                except:
-                    self._dbg("problem in module {} {}".format(function_name, data))
-            else:
-                eval("self.module." + function_name)(data)
+                except Exception:
+                    logging.exception("problem in module {} {}".format(function_name, data))
         if "catch_all" in dir(self.module):
-            try:
+            if self.debug is True:
+                # this makes the plugin fail with stack trace in debug mode
                 self.module.catch_all(data)
-            except:
-                self._dbg("problem in catch all")
+            else:
+                try:
+                    self.module.catch_all(data)
+                except Exception:
+                    logging.exception("problem in catch all: {} {}".format(self.module, data))
 
     def do_jobs(self):
         for job in self.jobs:
@@ -193,15 +198,16 @@ class Job(object):
 
     def check(self):
         if self.lastrun + self.interval < time.time():
-            if self.debug is False:
+            if self.debug is True:
+                # this makes the plugin fail with stack trace in debug mode
+                self.function()
+            else:
+                # otherwise we log the exception and carry on
                 try:
                     self.function()
-                except:
-                    logging.debug("Problem in job check")
-            else:
-                self.function()
+                except Exception:
+                    logging.exception("Problem in job check: {}".format(self.function))
             self.lastrun = time.time()
-            pass
 
 
 class UnknownChannel(Exception):

@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import sys
-import logging
 from argparse import ArgumentParser
 
 import yaml
@@ -25,5 +24,3 @@ try:
     bot.start()
 except KeyboardInterrupt:
     sys.exit(0)
-except:
-    logging.exception('OOPS')
