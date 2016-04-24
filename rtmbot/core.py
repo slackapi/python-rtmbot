@@ -1,36 +1,53 @@
 #!/usr/bin/env python
 import sys
 import glob
-import yaml
 import os
 import time
 import logging
-
-from argparse import ArgumentParser
 
 from slackclient import SlackClient
 
 sys.dont_write_bytecode = True
 
 
-def dbg(debug_string):
-    if debug:
-        logging.info(debug_string)
-
-
 class RtmBot(object):
-    def __init__(self, token):
+    def __init__(self, config):
+        # set the config object
+        self.config = config
+
+        # set slack token
+        self.token = config.get('SLACK_TOKEN')
+
+        # set working directory for loading plugins or other files
+        working_directory = os.path.dirname(sys.argv[0])
+        self.directory = self.config.get('BASE_PATH', working_directory)
+        if not self.directory.startswith('/'):
+            path = '{}/{}'.format(os.getcwd(), self.directory)
+            self.directory = os.path.abspath(path)
+
+        # establish logging
+        log_file = config.get('LOGFILE', 'rtmbot.log')
+        logging.basicConfig(filename=log_file,
+                            level=logging.INFO,
+                            format='%(asctime)s %(message)s')
+        logging.info(self.directory)
+        self.debug = self.config.get('DEBUG', False)
+
+        # initialize stateful fields
         self.last_ping = 0
-        self.token = token
         self.bot_plugins = []
         self.slack_client = None
+
+    def _dbg(self, debug_string):
+        if self.debug:
+            logging.info(debug_string)
 
     def connect(self):
         """Convenience method that creates Server instance"""
         self.slack_client = SlackClient(self.token)
         self.slack_client.rtm_connect()
 
-    def start(self):
+    def _start(self):
         self.connect()
         self.load_plugins()
         while True:
@@ -40,6 +57,14 @@ class RtmBot(object):
             self.output()
             self.autoping()
             time.sleep(.1)
+
+    def start(self):
+        if 'DAEMON' in self.config:
+            if self.config.get('DAEMON'):
+                import daemon
+                with daemon.DaemonContext():
+                    self._start()
+        self._start()
 
     def autoping(self):
         # hardcode the interval to 3 seconds
@@ -51,7 +76,7 @@ class RtmBot(object):
     def input(self, data):
         if "type" in data:
             function_name = "process_" + data["type"]
-            dbg("got {}".format(function_name))
+            self._dbg("got {}".format(function_name))
             for plugin in self.bot_plugins:
                 plugin.register_jobs()
                 plugin.do(function_name, data)
@@ -74,39 +99,46 @@ class RtmBot(object):
             plugin.do_jobs()
 
     def load_plugins(self):
-        for plugin in glob.glob(directory + '/plugins/*'):
+        for plugin in glob.glob(self.directory + '/plugins/*'):
             sys.path.insert(0, plugin)
-            sys.path.insert(0, directory + '/plugins/')
-        for plugin in glob.glob(directory + '/plugins/*.py') + \
-                glob.glob(directory + '/plugins/*/*.py'):
+            sys.path.insert(0, self.directory + '/plugins/')
+        for plugin in glob.glob(self.directory + '/plugins/*.py') + \
+                glob.glob(self.directory + '/plugins/*/*.py'):
             logging.info(plugin)
             name = plugin.split('/')[-1][:-3]
-            # try:
-            self.bot_plugins.append(Plugin(name))
-            # except:
-            #   print "error loading plugin %s" % name
+            if name in self.config:
+                logging.info("config found for: " + name)
+            plugin_config = self.config.get(name, {})
+            plugin_config['DEBUG'] = self.debug
+            self.bot_plugins.append(Plugin(name, plugin_config))
 
 
 class Plugin(object):
 
     def __init__(self, name, plugin_config=None):
+        '''
+        A plugin in initialized with:
+            - name (str)
+            - plugin config (dict) - (from the yaml config)
+                Values in config:
+                - DEBUG (bool) - this will be overridden if debug is set in config for this plugin
+        '''
         if plugin_config is None:
-            plugin_config = {}  # TODO: is this variable necessary?
+            plugin_config = {}
         self.name = name
         self.jobs = []
         self.module = __import__(name)
+        self.module.config = plugin_config
+        self.debug = self.module.config.get('DEBUG', False)
         self.register_jobs()
         self.outputs = []
-        if name in config:
-            logging.info("config found for: " + name)
-            self.module.config = config[name]
         if 'setup' in dir(self.module):
             self.module.setup()
 
     def register_jobs(self):
         if 'crontable' in dir(self.module):
             for interval, function in self.module.crontable:
-                self.jobs.append(Job(interval, eval("self.module." + function)))
+                self.jobs.append(Job(interval, eval("self.module." + function), self.debug))
             logging.info(self.module.crontable)
             self.module.crontable = []
         else:
@@ -114,19 +146,24 @@ class Plugin(object):
 
     def do(self, function_name, data):
         if function_name in dir(self.module):
-            # this makes the plugin fail with stack trace in debug mode
-            if not debug:
+            if self.debug is True:
+                # this makes the plugin fail with stack trace in debug mode
+                eval("self.module." + function_name)(data)
+            else:
+                # otherwise we log the exception and carry on
                 try:
                     eval("self.module." + function_name)(data)
-                except:
-                    dbg("problem in module {} {}".format(function_name, data))
-            else:
-                eval("self.module." + function_name)(data)
+                except Exception:
+                    logging.exception("problem in module {} {}".format(function_name, data))
         if "catch_all" in dir(self.module):
-            try:
+            if self.debug is True:
+                # this makes the plugin fail with stack trace in debug mode
                 self.module.catch_all(data)
-            except:
-                dbg("problem in catch all")
+            else:
+                try:
+                    self.module.catch_all(data)
+                except Exception:
+                    logging.exception("problem in catch all: {} {}".format(self.module, data))
 
     def do_jobs(self):
         for job in self.jobs:
@@ -147,10 +184,11 @@ class Plugin(object):
 
 
 class Job(object):
-    def __init__(self, interval, function):
+    def __init__(self, interval, function, debug):
         self.function = function
         self.interval = interval
         self.lastrun = 0
+        self.debug = debug
 
     def __str__(self):
         return "{} {} {}".format(self.function, self.interval, self.lastrun)
@@ -160,67 +198,17 @@ class Job(object):
 
     def check(self):
         if self.lastrun + self.interval < time.time():
-            if not debug:
+            if self.debug is True:
+                # this makes the plugin fail with stack trace in debug mode
+                self.function()
+            else:
+                # otherwise we log the exception and carry on
                 try:
                     self.function()
-                except:
-                    dbg("problem")
-            else:
-                self.function()
+                except Exception:
+                    logging.exception("Problem in job check: {}".format(self.function))
             self.lastrun = time.time()
-            pass
 
 
 class UnknownChannel(Exception):
     pass
-
-
-def main_loop():
-    if "LOGFILE" in config:
-        logging.basicConfig(
-            filename=config["LOGFILE"],
-            level=logging.INFO,
-            format='%(asctime)s %(message)s'
-        )
-    logging.info(directory)
-    try:
-        bot.start()
-    except KeyboardInterrupt:
-        sys.exit(0)
-    except:
-        logging.exception('OOPS')
-
-
-def parse_args():
-    parser = ArgumentParser()
-    parser.add_argument(
-        '-c',
-        '--config',
-        help='Full path to config file.',
-        metavar='path'
-    )
-    return parser.parse_args()
-
-
-if __name__ == "__main__":
-    args = parse_args()
-    directory = os.path.dirname(sys.argv[0])
-    if not directory.startswith('/'):
-        directory = os.path.abspath("{}/{}".format(os.getcwd(),
-                                                   directory
-                                                   ))
-
-    config = yaml.load(open(args.config or 'rtmbot.conf', 'r'))
-    debug = config["DEBUG"]
-    bot = RtmBot(config["SLACK_TOKEN"])
-    site_plugins = []
-    files_currently_downloading = []
-    job_hash = {}
-
-    if 'DAEMON' in config:
-        if config["DAEMON"]:
-            import daemon
-
-            with daemon.DaemonContext():
-                main_loop()
-    main_loop()
