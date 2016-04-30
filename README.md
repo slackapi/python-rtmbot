@@ -51,7 +51,7 @@ To install the example 'repeat' plugin
 
 The repeat plugin will now be loaded by the bot on startup.
 
-    ./start_rtmbot.py
+    ./rtmbot.py
 
 Create Plugins
 --------
