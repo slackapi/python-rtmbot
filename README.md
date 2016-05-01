@@ -2,6 +2,7 @@ python-rtmbot
 =============
 
 [![Build Status](https://travis-ci.org/slackhq/python-rtmbot.png)](https://travis-ci.org/slackhq/python-rtmbot)
+[![Coverage Status](https://coveralls.io/repos/github/slackhq/python-rtmbot/badge.svg?branch=master)](https://coveralls.io/github/slackhq/python-rtmbot?branch=master)
 
 A Slack bot written in python that connects via the RTM API.
 

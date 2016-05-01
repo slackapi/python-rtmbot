@@ -12,6 +12,17 @@ sys.dont_write_bytecode = True
 
 class RtmBot(object):
     def __init__(self, config):
+        '''
+            Params:
+                - config (dict):
+                    - SLACK_TOKEN: your authentication token from Slack
+                    - BASE_PATH (optional: defaults to execution directory) RtmBot will
+                        look in this directory for plugins.
+                    - LOGFILE (optional: defaults to rtmbot.log) The filename for logs, will
+                        be stored inside the BASE_PATH directory
+                    - DEBUG (optional: defaults to False) with debug enabled, RtmBot will
+                        break on errors
+        '''
         # set the config object
         self.config = config
 
@@ -30,7 +41,7 @@ class RtmBot(object):
         logging.basicConfig(filename=log_file,
                             level=logging.INFO,
                             format='%(asctime)s %(message)s')
-        logging.info(self.directory)
+        logging.info('Initialized in: {}'.format(self.directory))
         self.debug = self.config.get('DEBUG', False)
 
         # initialize stateful fields
