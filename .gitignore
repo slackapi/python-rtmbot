@@ -8,3 +8,5 @@ env
 *.un~
 0/
 tests/.cache
+.coverage
+.cache
