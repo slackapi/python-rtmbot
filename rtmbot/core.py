@@ -101,7 +101,7 @@ class RtmBot(object):
                     if limiter:
                         time.sleep(.1)
                         limiter = False
-                    message = output[1].encode('ascii', 'ignore').encode()
+                    message = output[1].encode('ascii', 'ignore').decode()
                     channel.send_message("{}".format(message))
                     limiter = True
 
