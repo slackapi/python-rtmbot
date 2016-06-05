@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import unicode_literals
 import sys
 import glob
 import os
@@ -101,8 +102,7 @@ class RtmBot(object):
                     if limiter:
                         time.sleep(.1)
                         limiter = False
-                    message = output[1]
-                    channel.send_message("{}".format(message))
+                    channel.send_message(output[1])
                     limiter = True
 
     def crons(self):
