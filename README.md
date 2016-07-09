@@ -48,7 +48,7 @@ Plugins can be installed as .py files in the ```plugins/``` directory OR as a .p
 To install the example 'repeat' plugin
 
     mkdir plugins/repeat
-    cp doc/example-plugins/repeat.py plugins/repeat.py
+    cp doc/example-plugins/repeat.py plugins/repeat/
 
 The repeat plugin will now be loaded by the bot on startup.
 
