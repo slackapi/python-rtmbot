@@ -34,7 +34,7 @@ Installation
 
 3. Configure rtmbot (https://api.slack.com/bot-users)
 
-        cp doc/example-config/rtmbot.conf .
+        cp docs/example-config/rtmbot.conf .
         vi rtmbot.conf
           SLACK_TOKEN: "xoxb-11111111111-222222222222222"
 
@@ -48,7 +48,7 @@ Plugins can be installed as .py files in the ```plugins/``` directory OR as a .p
 To install the example 'repeat' plugin
 
     mkdir plugins/repeat
-    cp doc/example-plugins/repeat.py plugins/repeat/
+    cp docs/example-plugins/repeat.py plugins/repeat/
 
 The repeat plugin will now be loaded by the bot on startup.
 
