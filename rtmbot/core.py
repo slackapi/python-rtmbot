@@ -48,7 +48,7 @@ class RtmBot(object):
         # initialize stateful fields
         self.last_ping = 0
         self.bot_plugins = []
-        self.slack_client = None
+        self.slack_client = SlackClient(self.token)
 
     def _dbg(self, debug_string):
         if self.debug:
@@ -56,7 +56,6 @@ class RtmBot(object):
 
     def connect(self):
         """Convenience method that creates Server instance"""
-        self.slack_client = SlackClient(self.token)
         self.slack_client.rtm_connect()
 
     def _start(self):
