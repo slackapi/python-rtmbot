@@ -1,13 +1,11 @@
 #!/usr/bin/env python
+from argparse import ArgumentParser
 import sys
 import os
-sys.path.append(os.getcwd())
-
-from argparse import ArgumentParser
-
 import yaml
 import client
 
+sys.path.append(os.getcwd())
 
 def parse_args():
     parser = ArgumentParser()
