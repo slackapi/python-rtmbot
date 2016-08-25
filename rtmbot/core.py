@@ -31,7 +31,7 @@ class RtmBot(object):
         self.token = config.get('SLACK_TOKEN')
 
         # set working directory for loading plugins or other files
-        working_directory = os.path.dirname(sys.argv[0])
+        working_directory = os.path.abspath(os.path.dirname(sys.argv[0]))
         self.directory = self.config.get('BASE_PATH', working_directory)
         if not self.directory.startswith('/'):
             path = '{}/{}'.format(os.getcwd(), self.directory)
@@ -109,13 +109,14 @@ class RtmBot(object):
             plugin.do_jobs()
 
     def load_plugins(self):
-        for plugin in glob.glob(self.directory + '/plugins/*'):
+        plugin_dir = os.path.join(self.directory, 'plugins')
+        for plugin in glob.glob(os.path.join(plugin_dir, '*')):
             sys.path.insert(0, plugin)
-            sys.path.insert(0, self.directory + '/plugins/')
-        for plugin in glob.glob(self.directory + '/plugins/*.py') + \
-                glob.glob(self.directory + '/plugins/*/*.py'):
+            sys.path.insert(0, plugin_dir)
+        for plugin in glob.glob(os.path.join(plugin_dir, '*.py')) + \
+                glob.glob(os.path.join(plugin_dir, '*', '*.py')):
             logging.info(plugin)
-            name = plugin.split('/')[-1][:-3]
+            name = plugin.split(os.sep)[-1][:-3]
             if name in self.config:
                 logging.info("config found for: " + name)
             plugin_config = self.config.get(name, {})
