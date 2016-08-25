@@ -1,9 +1,11 @@
 #!/usr/bin/env python
-import sys
 from argparse import ArgumentParser
-
+import sys
+import os
 import yaml
-from rtmbot import RtmBot
+import client
+
+sys.path.append(os.getcwd())
 
 
 def parse_args():
@@ -19,7 +21,7 @@ def parse_args():
 # load args with config path
 args = parse_args()
 config = yaml.load(open(args.config or 'rtmbot.conf', 'r'))
-bot = RtmBot(config)
+bot = client.init(config)
 try:
     bot.start()
 except KeyboardInterrupt:
