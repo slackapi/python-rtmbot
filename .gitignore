@@ -1,6 +1,7 @@
 *.pyc
 /rtmbot.conf
 /plugins/**
+/new_plugins/**
 /build/**
 *.log
 env

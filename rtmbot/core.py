@@ -8,6 +8,8 @@ import logging
 
 from slackclient import SlackClient
 
+from utils.module_loading import import_string
+
 sys.dont_write_bytecode = True
 
 
@@ -28,10 +30,15 @@ class RtmBot(object):
         self.config = config
 
         # set slack token
-        self.token = config.get('SLACK_TOKEN')
+        self.token = config.get('SLACK_TOKEN', None)
+        # TODO: Raise an exception if no SLACK_TOKEN is specified
 
-        # set working directory for loading plugins or other files
+        # get list of directories to search for loading plugins
+        self.active_plugins = config.get('ACTIVE_PLUGINS', None)
+
+        # set base directory for logs and plugin search
         working_directory = os.path.abspath(os.path.dirname(sys.argv[0]))
+
         self.directory = self.config.get('BASE_PATH', working_directory)
         if not self.directory.startswith('/'):
             path = os.path.join(os.getcwd(), self.directory)
@@ -60,7 +67,7 @@ class RtmBot(object):
 
     def _start(self):
         self.connect()
-        self.load_plugins()
+        self.load_plugins() # <<<<------------------------
         while True:
             for reply in self.slack_client.rtm_read():
                 self.input(reply)
@@ -109,51 +116,64 @@ class RtmBot(object):
             plugin.do_jobs()
 
     def load_plugins(self):
-        plugin_dir = os.path.join(self.directory, 'plugins')
-        for plugin in glob.glob(os.path.join(plugin_dir, '*')):
-            sys.path.insert(0, plugin)
-            sys.path.insert(0, plugin_dir)
-        for plugin in glob.glob(os.path.join(plugin_dir, '*.py')) + \
-                glob.glob(os.path.join(plugin_dir, '*', '*.py')):
-            logging.info(plugin)
-            name = plugin.split(os.sep)[-1][:-3]
-            if name in self.config:
-                logging.info("config found for: " + name)
-            plugin_config = self.config.get(name, {})
-            plugin_config['DEBUG'] = self.debug
-            self.bot_plugins.append(Plugin(name, plugin_config))
+        ''' Given a set of plugin_path strings (directory names on the python path),
+        load any classes with Plugin in the name from any files within those dirs.
+        '''
+        self._dbg("Loading plugins")
+        for plugin_path in self.active_plugins:
+            self._dbg("Importing {}".format(plugin_path))
+
+            if self.debug is True:
+                # this makes the plugin fail with stack trace in debug mode
+                cls = import_string(plugin_path)
+            else:
+                # otherwise we log the exception and carry on
+                try:
+                    cls = import_string(plugin_path)
+                except ImportError:
+                    logging.exception("Problem importing {}".format(plugin_path))
+
+            plugin_config = self.config.get(cls.__name__, {})
+            plugin = cls(slack_client=self.slack_client, plugin_config=plugin_config)  # instatiate!
+            self.bot_plugins.append(plugin)
+            self._dbg("Plugin registered: {}".format(plugin))
 
 
 class Plugin(object):
 
-    def __init__(self, name, plugin_config=None):
+    def __init__(self, name=None, slack_client=None, plugin_config=None):
         '''
         A plugin in initialized with:
             - name (str)
+            - slack_client - a connected instance of SlackClient - can be used to make API
+                calls within the plugins
             - plugin config (dict) - (from the yaml config)
                 Values in config:
                 - DEBUG (bool) - this will be overridden if debug is set in config for this plugin
         '''
+        if name is None:
+            self.name = type(self).__name__
+        else:
+            self.name = name
         if plugin_config is None:
-            plugin_config = {}
-        self.name = name
+            self.plugin_config = {}
+        else:
+            self.plugin_config = plugin_config
+        self.slack_client = slack_client
         self.jobs = []
-        self.module = __import__(name)
-        self.module.config = plugin_config
-        self.debug = self.module.config.get('DEBUG', False)
+        self.debug = self.plugin_config.get('DEBUG', False)
         self.register_jobs()
         self.outputs = []
-        if 'setup' in dir(self.module):
-            self.module.setup()
 
     def register_jobs(self):
-        if 'crontable' in dir(self.module):
-            for interval, function in self.module.crontable:
-                self.jobs.append(Job(interval, eval("self.module." + function), self.debug))
-            logging.info(self.module.crontable)
-            self.module.crontable = []
-        else:
-            self.module.crontable = []
+        # if 'crontable' in dir(self.module):
+        #     for interval, function in self.module.crontable:
+        #         self.jobs.append(Job(interval, eval("self.module." + function), self.debug))
+        #     logging.info(self.module.crontable)
+        #     self.module.crontable = []
+        # else:
+        #     self.module.crontable = []
+        pass
 
     def do(self, function_name, data):
         if function_name in dir(self.module):
