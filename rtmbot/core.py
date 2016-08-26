@@ -34,7 +34,7 @@ class RtmBot(object):
         working_directory = os.path.abspath(os.path.dirname(sys.argv[0]))
         self.directory = self.config.get('BASE_PATH', working_directory)
         if not self.directory.startswith('/'):
-            path = '{}/{}'.format(os.getcwd(), self.directory)
+            path = os.path.join(os.getcwd(), self.directory)
             self.directory = os.path.abspath(path)
 
         # establish logging
