@@ -67,10 +67,10 @@ class RtmBot(object):
 
     def _start(self):
         self.connect()
-        self.load_plugins() # <<<<------------------------
+        self.load_plugins()
         while True:
             for reply in self.slack_client.rtm_read():
-                self.input(reply)
+                self.input(reply) # <<<<------------------------
             self.crons()
             self.output()
             self.autoping()
@@ -176,25 +176,38 @@ class Plugin(object):
         pass
 
     def do(self, function_name, data):
-        if function_name in dir(self.module):
+        try:
+            func = getattr(self, function_name)
+        except AttributeError:
+            pass
+        else:
             if self.debug is True:
                 # this makes the plugin fail with stack trace in debug mode
-                eval("self.module." + function_name)(data)
+                func(data)
             else:
                 # otherwise we log the exception and carry on
                 try:
-                    eval("self.module." + function_name)(data)
+                    func(data)
                 except Exception:
-                    logging.exception("problem in module {} {}".format(function_name, data))
-        if "catch_all" in dir(self.module):
+                    logging.exception("Problem in Plugin Class: {}: {} \n{}".format(
+                        self.name, function_name, data)
+                    )
+
+        try:
+            func = getattr(self, 'catch_all')
+        except AttributeError:
+            return
+        else:
             if self.debug is True:
                 # this makes the plugin fail with stack trace in debug mode
-                self.module.catch_all(data)
+                self.catch_all(data)
             else:
                 try:
-                    self.module.catch_all(data)
+                    self.catch_all(data)
                 except Exception:
-                    logging.exception("problem in catch all: {} {}".format(self.module, data))
+                    logging.exception("Problem in catch all: {}: {} {}".format(
+                        self.name, self.module, data)
+                    )
 
     def do_jobs(self):
         for job in self.jobs:
@@ -203,14 +216,11 @@ class Plugin(object):
     def do_output(self):
         output = []
         while True:
-            if 'outputs' in dir(self.module):
-                if len(self.module.outputs) > 0:
-                    logging.info("output from {}".format(self.module))
-                    output.append(self.module.outputs.pop(0))
-                else:
-                    break
+            if len(self.outputs) > 0:
+                logging.info("output from {}".format(self.name))
+                output.append(self.outputs.pop(0))
             else:
-                self.module.outputs = []
+                break
         return output
 
 
