@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 from __future__ import unicode_literals
 import sys
-import glob
 import os
 import time
 import logging
@@ -68,9 +67,15 @@ class RtmBot(object):
     def _start(self):
         self.connect()
         self.load_plugins()
+        for plugin in self.bot_plugins:
+            try:
+                self._dbg("Registering jobs for {}".format(plugin.name))
+                plugin.register_jobs()
+            except:
+                self._dbg("No jobs registered for {}".format(plugin.name))
         while True:
             for reply in self.slack_client.rtm_read():
-                self.input(reply) # <<<<------------------------
+                self.input(reply)
             self.crons()
             self.output()
             self.autoping()
@@ -96,7 +101,6 @@ class RtmBot(object):
             function_name = "process_" + data["type"]
             self._dbg("got {}".format(function_name))
             for plugin in self.bot_plugins:
-                plugin.register_jobs()
                 plugin.do(function_name, data)
 
     def output(self):
@@ -162,18 +166,14 @@ class Plugin(object):
         self.slack_client = slack_client
         self.jobs = []
         self.debug = self.plugin_config.get('DEBUG', False)
-        self.register_jobs()
         self.outputs = []
 
     def register_jobs(self):
-        # if 'crontable' in dir(self.module):
-        #     for interval, function in self.module.crontable:
-        #         self.jobs.append(Job(interval, eval("self.module." + function), self.debug))
-        #     logging.info(self.module.crontable)
-        #     self.module.crontable = []
-        # else:
-        #     self.module.crontable = []
-        pass
+        ''' Please override this job with a method that instantiates any jobs
+        you'd like to run from this plugin and attaches them to self.jobs. See
+        the example plugins for examples.
+        '''
+        raise NotImplementedError
 
     def do(self, function_name, data):
         try:
@@ -193,11 +193,7 @@ class Plugin(object):
                         self.name, function_name, data)
                     )
 
-        try:
-            func = getattr(self, 'catch_all')
-        except AttributeError:
-            return
-        else:
+        if hasattr(self, 'catch_all'):
             if self.debug is True:
                 # this makes the plugin fail with stack trace in debug mode
                 self.catch_all(data)
@@ -225,11 +221,12 @@ class Plugin(object):
 
 
 class Job(object):
-    def __init__(self, interval, function, debug):
+    def __init__(self, interval, function, debug, plugin):
         self.function = function
         self.interval = interval
         self.lastrun = 0
         self.debug = debug
+        self.plugin = plugin
 
     def __str__(self):
         return "{} {} {}".format(self.function, self.interval, self.lastrun)
@@ -239,15 +236,18 @@ class Job(object):
 
     def check(self):
         if self.lastrun + self.interval < time.time():
+            func = getattr(self, self.function)
             if self.debug is True:
                 # this makes the plugin fail with stack trace in debug mode
-                self.function()
+                func()
             else:
                 # otherwise we log the exception and carry on
                 try:
-                    self.function()
+                    func()
                 except Exception:
-                    logging.exception("Problem in job check: {}".format(self.function))
+                    logging.exception("Problem in job check: {}: {}".format(
+                        self.__class__, self.function)
+                    )
             self.lastrun = time.time()
 
 
