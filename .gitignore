@@ -11,3 +11,8 @@ env
 tests/.cache
 .coverage
 .cache
+
+# Packaging related
+dist/
+rtmbot.egg-info/
+MANIFEST

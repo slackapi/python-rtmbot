@@ -3,7 +3,8 @@ from argparse import ArgumentParser
 import sys
 import os
 import yaml
-import client
+
+from rtmbot import RtmBot
 
 sys.path.append(os.getcwd())
 
@@ -18,11 +19,16 @@ def parse_args():
     )
     return parser.parse_args()
 
-# load args with config path
-args = parse_args()
-config = yaml.load(open(args.config or 'rtmbot.conf', 'r'))
-bot = client.init(config)
-try:
-    bot.start()
-except KeyboardInterrupt:
-    sys.exit(0)
+
+def main(args=None):
+    # load args with config path
+    args = parse_args()
+    config = yaml.load(open(args.config or 'rtmbot.conf', 'r'))
+    bot = RtmBot(config)
+    try:
+        bot.start()
+    except KeyboardInterrupt:
+        sys.exit(0)
+
+if __name__ == "__main__":
+    main()

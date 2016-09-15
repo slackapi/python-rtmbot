@@ -7,7 +7,7 @@ import logging
 
 from slackclient import SlackClient
 
-from utils.module_loading import import_string
+from rtmbot.utils.module_loading import import_string
 
 sys.dont_write_bytecode = True
 
@@ -33,7 +33,7 @@ class RtmBot(object):
         # TODO: Raise an exception if no SLACK_TOKEN is specified
 
         # get list of directories to search for loading plugins
-        self.active_plugins = config.get('ACTIVE_PLUGINS', None)
+        self.active_plugins = config.get('ACTIVE_PLUGINS', [])
 
         # set base directory for logs and plugin search
         working_directory = os.path.abspath(os.path.dirname(sys.argv[0]))
@@ -124,6 +124,10 @@ class RtmBot(object):
         load any classes with Plugin in the name from any files within those dirs.
         '''
         self._dbg("Loading plugins")
+        if not self.active_plugins:
+            self._dbg("No plugins specified in conf file")
+            return  # nothing to load
+
         for plugin_path in self.active_plugins:
             self._dbg("Importing {}".format(plugin_path))
 
