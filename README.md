@@ -6,7 +6,7 @@ python-rtmbot
 
 A Slack bot written in Python that connects via the RTM API.
 
-Python-rtmbot is a bot engine. The plugins architecture should be familiar to anyone with knowledge to the [Slack API](https://api.slack.com) and Python. The configuration file format is YAML.
+Python-rtmbot is a bot engine. The plugins architecture should be familiar to anyone with knowledge of the [Slack API](https://api.slack.com) and Python. The configuration file format is YAML.
 
 Some differences to webhooks:
 
@@ -28,11 +28,11 @@ Installation
         mkdir myproject
         cd myproject
 
-2. Install rtmbot (ideally into a virtualenv https://virtualenv.readthedocs.io/en/latest/)
+2. Install rtmbot (ideally into a [virtualenv](https://virtualenv.readthedocs.io/en/latest/))
 
         pip install rtmbot
 
-3. Create and rtmbot.conf file and configure rtmbot (https://api.slack.com/bot-users)
+3. Create an rtmbot.conf file and [create a bot for your team](https://api.slack.com/bot-users)
 
         # Add the following to rtmbot.conf
         DEBUG: True # make this False in production
@@ -40,9 +40,9 @@ Installation
         ACTIVE_PLUGINS:
             - plugins.repeat.RepeatPlugin
 
-```DEBUG``` will adjust logging verbosity and cause the runner to exit on exceptions, generally making dubugging more pleasant.
+```DEBUG``` will adjust logging verbosity and cause the runner to exit on exceptions, generally making debugging more pleasant.
 
-```SLACK_TOKEN``` is needed to authenticate with your Slack team. More info at https://api.slack.com/web#authentication
+```SLACK_TOKEN``` is needed to [authenticate with your Slack team.](https://api.slack.com/web#authentication)
 
 ```ACTIVE_PLUGINS``` RTMBot will attempt to import any Plugin specified in `ACTIVE_PLUGINS` (relative to your python path) and instantiate them as plugins. These specified classes should inherit from the core Plugin class.
 
@@ -63,7 +63,7 @@ RtmBot
 
 Add Plugins
 -------
-Plugins can live within any python module, but we recommend just putting them in ./plugins. (Don't forget to add an __init__.py file to your directory to make it a module -- use `touch __init__.py` within your plugin directory to create one)
+Plugins can live within any python module, but we recommend just putting them in ./plugins. (Don't forget to add an `__init__.py` file to your directory to make it a module -- use `touch __init__.py` within your plugin directory to create one)
 
 To add a plugin, create a file within your plugin directory (./plugins is a good place for it).
 

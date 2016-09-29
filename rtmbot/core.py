@@ -30,7 +30,8 @@ class RtmBot(object):
 
         # set slack token
         self.token = config.get('SLACK_TOKEN', None)
-        # TODO: Raise an exception if no SLACK_TOKEN is specified
+        if not self.token:
+            raise ValueError("Please add a SLACK_TOKEN to your config file.")
 
         # get list of directories to search for loading plugins
         self.active_plugins = config.get('ACTIVE_PLUGINS', [])
@@ -71,8 +72,12 @@ class RtmBot(object):
             try:
                 self._dbg("Registering jobs for {}".format(plugin.name))
                 plugin.register_jobs()
-            except:
+            except NotImplementedError:  # this plugin doesn't register jobs
                 self._dbg("No jobs registered for {}".format(plugin.name))
+            except Exception as error:
+                self._dbg("Error registering jobs for {} - {}".format(
+                    plugin.name, error)
+                )
         while True:
             for reply in self.slack_client.rtm_read():
                 self.input(reply)
@@ -138,8 +143,10 @@ class RtmBot(object):
                 # otherwise we log the exception and carry on
                 try:
                     cls = import_string(plugin_path)
-                except ImportError:
-                    logging.exception("Problem importing {}".format(plugin_path))
+                except ImportError as error:
+                    logging.exception("Problem importing {} - {}".format(
+                        plugin_path, error)
+                    )
 
             plugin_config = self.config.get(cls.__name__, {})
             plugin = cls(slack_client=self.slack_client, plugin_config=plugin_config)  # instatiate!
