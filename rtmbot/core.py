@@ -44,13 +44,17 @@ class RtmBot(object):
             path = os.path.join(os.getcwd(), self.directory)
             self.directory = os.path.abspath(path)
 
+        self.debug = self.config.get('DEBUG', False)
         # establish logging
         log_file = config.get('LOGFILE', 'rtmbot.log')
+        if self.debug:
+            log_level = logging.DEBUG
+        else:
+            log_level = logging.INFO
         logging.basicConfig(filename=log_file,
-                            level=logging.INFO,
+                            level=log_level,
                             format='%(asctime)s %(message)s')
         logging.info('Initialized in: {}'.format(self.directory))
-        self.debug = self.config.get('DEBUG', False)
 
         # initialize stateful fields
         self.last_ping = 0
@@ -59,7 +63,7 @@ class RtmBot(object):
 
     def _dbg(self, debug_string):
         if self.debug:
-            logging.info(debug_string)
+            logging.debug(debug_string)
 
     def connect(self):
         """Convenience method that creates Server instance"""
@@ -218,7 +222,24 @@ class Plugin(object):
 
     def do_jobs(self):
         for job in self.jobs:
-            job.check()
+            if job.check():
+                # interval is up, so run the job
+
+                if self.debug is True:
+                    # this makes the plugin fail with stack trace in debug mode
+                    job_output = job.run(self.slack_client)
+                else:
+                    # otherwise we log the exception and carry on
+                    try:
+                        job_output = job.run(self.slack_client)
+                    except Exception:
+                        logging.exception("Problem in job run: {}".format(
+                            job.__class__)
+                        )
+
+                # job attempted execution so reset the timer and log output
+                job.lastrun = time.time()
+                self.outputs.append(job_output)
 
     def do_output(self):
         output = []
@@ -232,34 +253,50 @@ class Plugin(object):
 
 
 class Job(object):
-    def __init__(self, interval, function, debug, plugin):
-        self.function = function
+    '''
+        Jobs can be used to trigger periodic method calls. Jobs must be
+        registered with a Plugin to be called. See the register_jobs method
+        and documentation for how to make this work.
+
+        :Args:
+            interval (int): The interval in seconds at which this Job's run
+                method should be called
+    '''
+    def __init__(self, interval):
         self.interval = interval
         self.lastrun = 0
-        self.debug = debug
-        self.plugin = plugin
 
     def __str__(self):
-        return "{} {} {}".format(self.function, self.interval, self.lastrun)
+        return "{} {} {}".format(self.__class__, self.interval, self.lastrun)
 
     def __repr__(self):
         return self.__str__()
 
     def check(self):
+        ''' Returns True if `interval` seconds have passed since it last ran '''
         if self.lastrun + self.interval < time.time():
-            func = getattr(self, self.function)
-            if self.debug is True:
-                # this makes the plugin fail with stack trace in debug mode
-                func()
-            else:
-                # otherwise we log the exception and carry on
-                try:
-                    func()
-                except Exception:
-                    logging.exception("Problem in job check: {}: {}".format(
-                        self.__class__, self.function)
-                    )
-            self.lastrun = time.time()
+            return True
+        else:
+            return False
+
+    def run(self, slack_client):
+        ''' This method is called from the plugin and is where the logic for
+        your Job starts and finished. It is called every `interval` seconds
+        from Job.check()
+
+        :Args:
+            slackclient (Slackclient): An instance of the Slackclient API connector
+                this can be used to make calls directly to the Slack Web API if
+                necessary.
+
+
+        This method should return an array of outputs in the form of::
+
+            [Channel Identifier, Output String]
+            or
+            ['C12345678', 'Here's my output for this channel']
+        '''
+        raise NotImplementedError
 
 
 class UnknownChannel(Exception):
