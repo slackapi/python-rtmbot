@@ -21,8 +21,10 @@ def parse_args():
 
 
 def main(args=None):
-    # load args with config path
-    args = parse_args()
+    # load args with config path if not specified
+    if not args:
+        args = parse_args()
+
     config = yaml.load(open(args.config or 'rtmbot.conf', 'r'))
     bot = RtmBot(config)
     try:

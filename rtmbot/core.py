@@ -239,7 +239,8 @@ class Plugin(object):
 
                 # job attempted execution so reset the timer and log output
                 job.lastrun = time.time()
-                self.outputs.append(job_output)
+                for out in job_output:
+                    self.outputs.append(out)
 
     def do_output(self):
         output = []
@@ -292,9 +293,9 @@ class Job(object):
 
         This method should return an array of outputs in the form of::
 
-            [Channel Identifier, Output String]
+            [[Channel Identifier, Output String]]
             or
-            ['C12345678', 'Here's my output for this channel']
+            [['C12345678', 'Here's my output for this channel'], ['C87654321', 'Different output']
         '''
         raise NotImplementedError
 

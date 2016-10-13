@@ -8,6 +8,8 @@ A Slack bot written in Python that connects via the RTM API.
 
 Python-rtmbot is a bot engine. The plugins architecture should be familiar to anyone with knowledge of the [Slack API](https://api.slack.com) and Python. The configuration file format is YAML.
 
+This project is currently pre-1.0. As such, you should plan for it to have breaking changes from time to time. For any breaking changes, we will bump the minor version while we are pre-1.0. (e.g. 0.2.4 -> 0.3.0 implies breaking changes). If stabiilty is important, you'll likely want to lock in a specific minor version)
+
 Some differences to webhooks:
 
 1. Doesn't require a webserver to receive messages
@@ -143,27 +145,27 @@ Plugins also have access to the connected SlackClient instance for more complex 
     def process_message(self, data):
         self.slack_client.api_call(
             "chat.postMessage", channel="#general", text="Hello from Python! :tada:",
-            username='pybot', icon_emoji=':robot_face:'
+            username="pybot", icon_emoji=":robot_face:"
 
 
 ####Timed jobs
-Plugins can also run methods on a schedule. This allows a plugin to poll for updates or perform housekeeping during its lifetime. This is done by appending a two item array to the crontable array. The first item is the interval in seconds and the second item is the method to run. For example, this will print "hello world" every 10 seconds.
+Plugins can also run methods on a schedule. This allows a plugin to poll for updates or perform housekeeping during its lifetime. Jobs define a run() method and return any outputs to be sent to channels. They also have access to a SlackClient instance that allows them to make calls to the Slack Web API.
 
-Note that the Job uses the associated Plugin's output array to output back to the RTM stream.
+For example, this will print "hello world" every 10 seconds. You can output multiple messages two the same or different channels by passing multiple pairs of [Channel, Message] combos.
 
     from core import Plugin, Job
 
 
     class myJob(Job):
 
-        def say_hello(self):
-            self.plugin.outputs.append(["C12345667", "hello world"])
+        def run(self, slack_client):
+            return [["C12345667", "hello world"]]
 
 
     class myPlugin(Plugin):
 
         def register_jobs(self):
-            job = myJob(10, 'say_hello', self.debug, self)
+            job = myJob(10, debug=True)
             self.jobs.append(job)
 
 
