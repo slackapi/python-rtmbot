@@ -225,7 +225,7 @@ class Plugin(object):
             if job.check():
                 # interval is up, so run the job
 
-                job_output = []
+                job_output = None
 
                 if self.debug is True:
                     # this makes the plugin fail with stack trace in debug mode
