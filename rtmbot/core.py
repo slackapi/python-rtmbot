@@ -225,6 +225,8 @@ class Plugin(object):
             if job.check():
                 # interval is up, so run the job
 
+                job_output = []
+
                 if self.debug is True:
                     # this makes the plugin fail with stack trace in debug mode
                     job_output = job.run(self.slack_client)
