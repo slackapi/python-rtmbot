@@ -239,11 +239,9 @@ class Plugin(object):
 
                 # job attempted execution so reset the timer and log output
                 job.lastrun = time.time()
-                if job_output is not None:
-                    print("I'm not NONE!!!")
-                    print(job_output)
-                    for out in job_output:
-                        self.outputs.append(out)
+                # if job_output is not None:
+                #     for out in job_output:
+                #         self.outputs.append(out)
 
     def do_output(self):
         output = []
