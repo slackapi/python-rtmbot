@@ -182,6 +182,7 @@ class Plugin(object):
         self.jobs = []
         self.debug = self.plugin_config.get('DEBUG', False)
         self.outputs = []
+        self.module = type(self).__module__
 
     def register_jobs(self):
         ''' Please override this job with a method that instantiates any jobs
