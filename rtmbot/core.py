@@ -140,6 +140,8 @@ class RtmBot(object):
         for plugin_path in self.active_plugins:
             self._dbg("Importing {}".format(plugin_path))
 
+            global cls
+            
             if self.debug is True:
                 # this makes the plugin fail with stack trace in debug mode
                 cls = import_string(plugin_path)
