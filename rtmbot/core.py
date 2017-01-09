@@ -221,6 +221,7 @@ class Plugin(object):
                     )
 
     def do_jobs(self):
+        job_output = []
         for job in self.jobs:
             if job.check():
                 # interval is up, so run the job
@@ -239,8 +240,9 @@ class Plugin(object):
 
                 # job attempted execution so reset the timer and log output
                 job.lastrun = time.time()
-                for out in job_output:
-                    self.outputs.append(out)
+                if job_output:
+                    for out in job_output:
+                        self.outputs.append(out)
 
     def do_output(self):
         output = []
