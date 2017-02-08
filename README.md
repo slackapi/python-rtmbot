@@ -76,7 +76,7 @@ To add a plugin, create a file within your plugin directory (./plugins is a good
 
 Add your plugin content into this file. Here's an example that will just print all of the requests it receives to the console. See below for more information on available methods.
 
-    from future import print_function
+    from __future__ import print_function
     from rtmbot.core import Plugin
 
     class MyPlugin(Plugin):
