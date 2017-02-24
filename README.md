@@ -55,12 +55,12 @@ A Word on Structure
 To give you a quick sense of how this library is structured, there is a RtmBot class which does the setup and handles input and outputs of messages. It will also search for and register Plugins within the specified directory(ies). These Plugins handle different message types with various methods and can also register periodic Jobs which will be executed by the Plugins.
 ```
 RtmBot
-|--> Plugin
-       |---> Job
-       |---> Job
-|--> Plugin
-|--> Plugin
-       |---> Job
+├── Plugin
+|      ├── Job
+|      └── Job
+├── Plugin
+└── Plugin
+       └── Job
 ```
 
 Add Plugins
