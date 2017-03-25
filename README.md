@@ -115,7 +115,7 @@ The repeat plugin will now be loaded by the bot on startup. Run `rtmbot` from co
 Create Plugins
 --------
 
-####Incoming data
+#### Incoming data
 All events from the RTM websocket are sent to the registered plugins. To act on an event, create a function definition, inside your Plugin class, called process_(api_method) that accepts a single arg for data. For example, to handle incoming messages:
 
     def process_message(self, data):
@@ -129,9 +129,9 @@ For a list of all possible API Methods, look here: https://api.slack.com/rtm
 
 Note: If you're using Python 2.x, the incoming data should be a unicode string, be careful you don't coerce it into a normal str object as it will cause errors on output. You can add `from __future__ import unicode_literals` to your plugin file to avoid this.
 
-####Outgoing data
+#### Outgoing data
 
-#####RTM Output
+##### RTM Output
 Plugins can send messages back to any channel or direct message. This is done by appending a two item array to the Plugin's output array (```myPluginInstance.output```). The first item in the array is the channel or DM ID and the second is the message text. Example that writes "hello world" when the plugin is started:
 
     class myPlugin(Plugin):
@@ -139,7 +139,7 @@ Plugins can send messages back to any channel or direct message. This is done by
         def process_message(self, data):
             self.outputs.append(["C12345667", "hello world"])
 
-#####SlackClient Web API Output
+##### SlackClient Web API Output
 Plugins also have access to the connected SlackClient instance for more complex output (or to fetch data you may need).
 
     def process_message(self, data):
@@ -148,7 +148,7 @@ Plugins also have access to the connected SlackClient instance for more complex 
             username="pybot", icon_emoji=":robot_face:"
 
 
-####Timed jobs
+#### Timed jobs
 Plugins can also run methods on a schedule. This allows a plugin to poll for updates or perform housekeeping during its lifetime. Jobs define a run() method and return any outputs to be sent to channels. They also have access to a SlackClient instance that allows them to make calls to the Slack Web API.
 
 For example, this will print "hello world" every 10 seconds. You can output multiple messages two the same or different channels by passing multiple pairs of [Channel, Message] combos.
@@ -169,5 +169,5 @@ For example, this will print "hello world" every 10 seconds. You can output mult
             self.jobs.append(job)
 
 
-####Plugin misc
+#### Plugin misc
 The data within a plugin persists for the life of the rtmbot process. If you need persistent data, you should use something like sqlite or the python pickle libraries.
