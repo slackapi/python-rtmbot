@@ -122,6 +122,9 @@ class RtmBot(object):
                 if destination.startswith('U'):
                     result = json.loads(self.slack_client.api_call('im.open', user=destination))
                     channel = self.slack_client.server.channels.find(result[u'channel'][u'id'])
+                elif destination.startswith('G'):
+                    result = json.loads(self.slack_client.api_call('groups.open'), channel=destination))
+                    channel = self.slack_client.server.channels.find(result[u'channel'][u'id'])
                 else:
                     channel = self.slack_client.server.channels.find(destination)
                 if channel != None and message != None:
