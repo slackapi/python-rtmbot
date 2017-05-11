@@ -4,6 +4,7 @@ import sys
 import os
 import time
 import logging
+import json
 
 from slackclient import SlackClient
 
@@ -130,7 +131,7 @@ class RtmBot(object):
                     channel = self.slack_client.server.channels.find(destination)
                 else:
                     channel = self.slack_client.server.channels.find(destination)
-                if channel != None and message != None:
+                if channel is not None and message is not None:
                     if limiter:
                         time.sleep(.1)
                         limiter = False
