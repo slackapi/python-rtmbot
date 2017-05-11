@@ -124,13 +124,13 @@ class RtmBot(object):
                         result = json.loads(self.slack_client.api_call('im.open', user=destination))
                     except ValueError:
                         self._dbg("Parse error on im.open call results!")
-                    channel = self.slack_client.server.channels.find(result[u'channel'][u'id'])
+                    channel = self.slack_client.server.channels.find(result.get(u'channel', {}).get(u'id', None))
                 elif destination.startswith('G'):
                     try:
                         result = json.loads(self.slack_client.api_call('groups.open'), channel=destination))
                     except ValueError:
                         self._dbg("Parse error on groups.open call results!")
-                    channel = self.slack_client.server.channels.find(result[u'channel'][u'id'])
+                    channel = self.slack_client.server.channels.find(result.get(u'channel', {}).get(u'id', None))
                 else:
                     channel = self.slack_client.server.channels.find(destination)
                 if channel != None and message != None:
