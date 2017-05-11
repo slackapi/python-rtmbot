@@ -116,12 +116,19 @@ class RtmBot(object):
         for plugin in self.bot_plugins:
             limiter = False
             for output in plugin.do_output():
-                channel = self.slack_client.server.channels.find(output[0])
-                if channel is not None and output[1] is not None:
+                destination = output[0]
+                message = output[1]
+                # things that start with U are users. convert to an IM channel.
+                if destination.startswith('U'):
+                    result = json.loads(self.slack_client.api_call('im.open', user=destination))
+                    channel = self.slack_client.server.channels.find(result[u'channel'][u'id'])
+                else:
+                    channel = self.slack_client.server.channels.find(destination)
+                if channel != None and message != None:
                     if limiter:
                         time.sleep(.1)
                         limiter = False
-                    channel.send_message(output[1])
+                    channel.send_message(message)
                     limiter = True
 
     def crons(self):
