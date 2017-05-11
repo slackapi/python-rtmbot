@@ -127,7 +127,7 @@ class RtmBot(object):
                         self._dbg("Parse error on im.open call results!")
                     channel = self.slack_client.server.channels.find(result.get(u'channel', {}).get(u'id', None))
                 elif destination.startswith('G'):
-                    result = self.slack_client.api_call('groups.open'), channel=destination)
+                    result = self.slack_client.api_call('groups.open', channel=destination)
                     channel = self.slack_client.server.channels.find(destination)
                 else:
                     channel = self.slack_client.server.channels.find(destination)
