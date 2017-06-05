@@ -8,7 +8,7 @@ A Slack bot written in Python that connects via the RTM API.
 
 Python-rtmbot is a bot engine. The plugins architecture should be familiar to anyone with knowledge of the [Slack API](https://api.slack.com) and Python. The configuration file format is YAML.
 
-This project is currently pre-1.0. As such, you should plan for it to have breaking changes from time to time. For any breaking changes, we will bump the minor version while we are pre-1.0. (e.g. 0.2.4 -> 0.3.0 implies breaking changes). If stabiilty is important, you'll likely want to lock in a specific minor version)
+This project is currently pre-1.0. As such, you should plan for it to have breaking changes from time to time. For any breaking changes, we will bump the minor version while we are pre-1.0. (e.g. 0.2.4 -> 0.3.0 implies breaking changes). If stability is important, you'll likely want to lock in a specific minor version)
 
 Some differences to webhooks:
 
@@ -84,7 +84,7 @@ Add your plugin content into this file. Here's an example that will just print a
         def catch_all(self, data):
             print(data)
 
-You can install as many plugins as you like, and each will handle every event received by the bot indepentently.
+You can install as many plugins as you like, and each will handle every event received by the bot independently.
 
 To create an example 'repeat' plugin:
 
@@ -151,7 +151,7 @@ Plugins also have access to the connected SlackClient instance for more complex 
 #### Timed jobs
 Plugins can also run methods on a schedule. This allows a plugin to poll for updates or perform housekeeping during its lifetime. Jobs define a run() method and return any outputs to be sent to channels. They also have access to a SlackClient instance that allows them to make calls to the Slack Web API.
 
-For example, this will print "hello world" every 10 seconds. You can output multiple messages two the same or different channels by passing multiple pairs of [Channel, Message] combos.
+For example, this will print "hello world" every 10 seconds. You can output multiple messages to the same or different channels by passing multiple pairs of [Channel, Message] combos.
 
     from core import Plugin, Job
 
