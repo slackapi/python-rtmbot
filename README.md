@@ -190,7 +190,7 @@ For example, this will print "hello world" every 10 seconds. You can output mult
     class myPlugin(Plugin):
 
         def register_jobs(self):
-            job = myJob(10, debug=True)
+            job = myJob(10)
             self.jobs.append(job)
 ```
 #### Plugin misc
