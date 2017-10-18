@@ -178,7 +178,7 @@ Plugins can also run methods on a schedule. This allows a plugin to poll for upd
 For example, this will print "hello world" every 10 seconds. You can output multiple messages to the same or different channels by passing multiple pairs of `[Channel, Message]` combos.
 
 ```python
-    from core import Plugin, Job
+    from rtmbot.core import Plugin, Job
 
 
     class myJob(Job):
