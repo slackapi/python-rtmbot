@@ -5,7 +5,10 @@ except ImportError:
     from mock import Mock, create_autospec
 
 from testfixtures import LogCapture
-from slackclient import SlackClient, _channel, _server, _util
+from slackclient import SlackClient
+from slackclient.server import Server
+from slackclient.channel import Channel
+from slackclient.util import SearchList
 from rtmbot.core import RtmBot, Plugin
 
 def init_rtmbot():
@@ -36,13 +39,13 @@ def test_output():
 
     # Mock the slack_client object with Server, Channel objects and needed methods
     slackclient_mock = create_autospec(SlackClient)
-    server_mock = create_autospec(_server.Server)
+    server_mock = create_autospec(Server)
 
     # Mock Server with channels method and correct return value
     slackclient_mock.server = server_mock
-    searchlist_mock = create_autospec(_util.SearchList)
+    searchlist_mock = create_autospec(SearchList)
     server_mock.channels = searchlist_mock
-    channel_mock = create_autospec(_channel.Channel)
+    channel_mock = create_autospec(Channel)
     slackclient_mock.server.channels.find.return_value = channel_mock
 
     rtmbot.slack_client = slackclient_mock
