@@ -140,6 +140,8 @@ class RtmBot(object):
         for plugin_path in self.active_plugins:
             self._dbg("Importing {}".format(plugin_path))
 
+            global cls
+            
             if self.debug is True:
                 # this makes the plugin fail with stack trace in debug mode
                 cls = import_string(plugin_path)
@@ -182,6 +184,7 @@ class Plugin(object):
         self.jobs = []
         self.debug = self.plugin_config.get('DEBUG', False)
         self.outputs = []
+        self.module = type(self).__module__
 
     def register_jobs(self):
         ''' Please override this job with a method that instantiates any jobs
@@ -239,8 +242,9 @@ class Plugin(object):
 
                 # job attempted execution so reset the timer and log output
                 job.lastrun = time.time()
-                for out in job_output:
-                    self.outputs.append(out)
+                # if job_output is not None:
+                #     for out in job_output:
+                #         self.outputs.append(out)
 
     def do_output(self):
         output = []
