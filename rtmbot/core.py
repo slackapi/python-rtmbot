@@ -4,6 +4,7 @@ import sys
 import os
 import time
 import logging
+import json
 
 from slackclient import SlackClient
 
@@ -116,12 +117,26 @@ class RtmBot(object):
         for plugin in self.bot_plugins:
             limiter = False
             for output in plugin.do_output():
-                channel = self.slack_client.server.channels.find(output[0])
-                if channel is not None and output[1] is not None:
+                destination = output[0]
+                message = output[1]
+                # things that start with U are users. convert to an IM channel.
+                if destination.startswith('U'):
+                    try:
+                        result = json.loads(self.slack_client.api_call('im.open', user=destination))
+                    except ValueError:
+                        self._dbg("Parse error on im.open call results!")
+                    channel = self.slack_client.server.channels.find(
+                        result.get(u'channel', {}).get(u'id', None))
+                elif destination.startswith('G'):
+                    result = self.slack_client.api_call('groups.open', channel=destination)
+                    channel = self.slack_client.server.channels.find(destination)
+                else:
+                    channel = self.slack_client.server.channels.find(destination)
+                if channel is not None and message is not None:
                     if limiter:
                         time.sleep(.1)
                         limiter = False
-                    channel.send_message(output[1])
+                    channel.send_message(message)
                     limiter = True
 
     def crons(self):
