@@ -1,3 +1,9 @@
+### v0.4.1 (2018-01-05)
+
+  * Fixes crashes due to missing `job_output`
+  * Removed `debug` from README example
+  * Various docs updates
+
 ### v0.2.0 (2016-03-25)
 
   * Fixed unicode handling to make things work in python 2.7 and 3.5.
