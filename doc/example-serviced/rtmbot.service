@@ -1,0 +1,14 @@
+[Unit]
+Description=Python Slack Bot.
+#After=syslog.target network.target
+
+[Service]
+#Type=forking
+PrivateTmp=yes
+User=root
+Group=root
+ExecStart=/opt/rtmbot-it/rtmbot.py -c /opt/rtmbot/rtmbot.conf
+PIDFile=/var/run/rtmbot/rtmbot.pid
+
+[Install]
+WantedBy=multi-user.target
