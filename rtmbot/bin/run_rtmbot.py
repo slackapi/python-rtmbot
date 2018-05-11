@@ -32,7 +32,6 @@ def load_overrides_from_env(config):
     '''
     Read and apply overrides from environment variables. For plugins, name of the class
     is turned into a prefix. For example:
-    
         YourAwesomePlugin.foo_bar => YOUR_AWESOME_PLUGIN_FOO_BAR
     '''
     def boolish(v):
@@ -52,7 +51,6 @@ def load_overrides_from_env(config):
         param['name']: param['type'](os.environ[param['name']])
         for param in params
         if param['name'] in os.environ})
-
 
     # Override plugin-specific variables. Since we don't know a schema,
     # treat values as string. Leave type conversion for plugins themselves.
