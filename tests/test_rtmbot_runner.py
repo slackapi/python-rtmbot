@@ -43,7 +43,8 @@ def test_normal_overrides():
         assert config == expected
 
 def test_plugin_overrides():
-    config = {'ACTIVE_PLUGINS': ['plugins.AwesomePlugin']}
+    config = {
+        'ACTIVE_PLUGINS': ['plugins.AwesomePlugin']}
 
     override = {
         'AWESOME_PLUGIN_FOO': '1',
@@ -55,5 +56,24 @@ def test_plugin_overrides():
         expected = {
             'foo': '1',
             'bar_bar': 'some_awesome_value'
+        }
+        assert config['plugins.AwesomePlugin'] == expected
+
+def test_plugin_config_already_exists():
+    config = {
+        'ACTIVE_PLUGINS': ['plugins.AwesomePlugin'],
+        'plugins.AwesomePlugin': {
+            'some_credential': 'foo'
+        }
+    }
+
+    override = {
+        'AWESOME_PLUGIN_SOME_CREDENTIAL': 'bar'
+    }
+
+    with override_env(override):
+        load_overrides_from_env(config)
+        expected = {
+            'some_credential': 'bar'
         }
         assert config['plugins.AwesomePlugin'] == expected
