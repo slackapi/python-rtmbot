@@ -122,7 +122,7 @@ class RtmBot(object):
                 # things that start with U are users. convert to an IM channel.
                 if destination.startswith('U'):
                     try:
-                        result = json.loads(self.slack_client.api_call('im.open', user=destination))
+                        result = self.slack_client.api_call('im.open', user=destination)
                     except ValueError:
                         self._dbg("Parse error on im.open call results!")
                     channel = self.slack_client.server.channels.find(
