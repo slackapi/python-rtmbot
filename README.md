@@ -1,6 +1,10 @@
 python-rtmbot
 =============
 
+**This project is no longer under active development.** If you’re just getting started, we recommend taking a look at the [Python SDK](https://slack.dev/python-slackclient) first. If you’ve been using this project, critical issues (such as security issues) will be addressed, but we advise planning to migrate to the Python SDK. You can still file an issue and ask us for help doing that!
+
+:bulb: If you’re interested in maintaining this package in the future, please [get in touch](mailto:opensource@slack.com)
+
 [![Build Status](https://travis-ci.org/slackapi/python-rtmbot.png)](https://travis-ci.org/slackapi/python-rtmbot)
 [![Coverage Status](https://coveralls.io/repos/github/slackhq/python-rtmbot/badge.svg?branch=master)](https://coveralls.io/github/slackhq/python-rtmbot?branch=master)
 
