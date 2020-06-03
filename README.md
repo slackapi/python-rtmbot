@@ -1,7 +1,7 @@
 python-rtmbot
 =============
 
-**This project is no longer under active development.** If you’re just getting started, we recommend taking a look at the [Python SDK](https://slack.dev/python-slackclient) first. If you’ve been using this project, critical issues (such as security issues) will be addressed, but we advise planning to migrate to the Python SDK. You can still file an issue and ask us for help doing that!
+**This project is no longer under active development.** If you’re just getting started, we recommend taking a look at the [Python SDK](https://slack.dev/python-slackclient) first. If you’ve been using this project, only critical issues (such as security issues) will be addressed, but we advise planning to migrate to the Python SDK. You can still [file an issue](https://github.com/slackapi/python-rtmbot/issues/new) and ask us for help doing that!
 
 :bulb: If you’re interested in maintaining this package in the future, please [get in touch](mailto:opensource@slack.com)
 
