@@ -60,6 +60,15 @@ Installation
 
 For example, if your python path includes '/path/to/myproject' and you include `plugins.repeat.RepeatPlugin` in ACTIVE_PLUGINS, it will find the RepeatPlugin class within /path/to/myproject/plugins/repeat.py and instantiate it, then attach it to your running RTMBot.
 
+### Environment variables
+
+All of the configurations variables mentioned can be overriden using environment
+variables. For example, the following will override slack token.
+
+    $ SLACK_TOKEN="xoxb-foo-bar" rtmbot
+
+This is especially useful when you want or need to hide credentials.
+
 A Word on Structure
 -------
 To give you a quick sense of how this library is structured, there is a RtmBot class which does the setup and handles input and outputs of messages. It will also search for and register Plugins within the specified directory(ies). These Plugins handle different message types with various methods and can also register periodic Jobs which will be executed by the Plugins.
@@ -129,6 +138,29 @@ The repeat plugin will now be loaded by the bot on startup. Run `rtmbot` from co
 
 ```
     rtmbot
+```
+
+###  Configuration
+
+You can configure your plugins using `rtmbot.conf` and environment variables.
+For example, running the following
+
+    $ REPEAT_PLUGIN_DUMMY_VARIABLE="true" rtmbot
+
+will result in effectively same as the following `rtmbot.conf`:
+
+```
+        plugins.repeat.RepeatPlugin:
+            dummy_variable: "true"
+```
+
+Note that environment variable values are treated as strings. If you need to
+override for example lists, booleans or numbers, handle it in your plugin. Plugin
+configuration can be accessed in the plugin from `self.plugin_config`.
+
+```python
+    def process_message(self, data):
+        print(self.plugin_config['dummy_variable']) # prints "true"
 ```
 
 Create Plugins
