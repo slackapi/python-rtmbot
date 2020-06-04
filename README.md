@@ -200,3 +200,59 @@ For example, this will print "hello world" every 10 seconds. You can output mult
 #### Plugin misc
 
 The data within a plugin persists for the life of the rtmbot process. If you need persistent data, you should use something like sqlite or the python pickle libraries.
+
+Running programmatically
+--------
+
+You can run the bot directly from a Python script, without needing command line. For example:
+
+```python
+    from rtmbot import RtmBot
+
+    config = {
+        "SLACK_TOKEN": "xoxb-xxxxxxxx-jhgasjhgajhsska",
+        "ACTIVE_PLUGINS": [],
+    }
+
+    bot = RtmBot(config)
+    bot.start()
+
+```
+
+#### Running multiple bots from the same script
+
+
+You can use the technique mentioned above to run multiple bots (or same bot from multiple teams) from a single script. Here for example, we have two slack tokens and we run two bots - one for every team - each in its own thread:
+
+```python
+
+    import time
+    import threading
+    from rtmbot import RtmBot
+
+    SLACK_TOKEN_A = "xoxb-111111111-nnnnnnnnnnnnnn"
+    SLACK_TOKEN_B = "xoxb-222222222-nnnnnnnnnnnnnn"
+    def start_bot(slack_token):
+        config = {
+            "SLACK_TOKEN": slack_token,
+            "ACTIVE_PLUGINS": [],
+        }
+
+        bot = RtmBot(config)
+        bot.start()
+
+    #running the bot in a thread. 
+    bot_thread = threading.Thread(target=start_bot, args=(SLACK_TOKEN_A,))
+    bot_thread .daemon = True        # we need this to CTRL+C 
+    bot_thread .start()
+
+    #running another instance for another team. You can make an array of tokens and threads to run the bots in a `for` loop
+    bot_thread = threading.Thread(target=start_bot, args=(SLACK_TOKEN_B,))
+    bot_thread .daemon = True        # we need this to CTRL+C 
+    bot_thread .start()
+
+    # running a loop that prevents from the main process ending
+    while True:
+        time.sleep(1)
+        print("slept")
+```
